@@ -11,6 +11,9 @@ public class Knight extends Piece {
 	public Knight(Color color) {
 		super(color);
 	}
+	public Knight(CPoint position) {
+		super(position);
+	}
 	public Knight() {
 		super();
 	}

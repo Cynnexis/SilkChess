@@ -11,6 +11,9 @@ public class King extends Piece {
 	public King(Color color) {
 		super(color);
 	}
+	public King(CPoint position) {
+		super(position);
+	}
 	public King() {
 		super();
 	}

@@ -11,6 +11,9 @@ public class Rook extends Piece {
 	public Rook(Color color) {
 		super(color);
 	}
+	public Rook(CPoint position) {
+		super(position);
+	}
 	public Rook() {
 		super();
 	}

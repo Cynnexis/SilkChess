@@ -11,6 +11,9 @@ public class Pawn extends Piece {
 	public Pawn(Color color) {
 		super(color);
 	}
+	public Pawn(CPoint position) {
+		super(position);
+	}
 	public Pawn() {
 		super();
 	}

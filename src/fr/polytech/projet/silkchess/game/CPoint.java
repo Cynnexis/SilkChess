@@ -3,7 +3,9 @@ package fr.polytech.projet.silkchess.game;
 import fr.berger.enhancedlist.Couple;
 import fr.berger.enhancedlist.Point;
 
-public class CPoint extends Couple<Character, Integer> {
+import java.io.Serializable;
+
+public class CPoint extends Couple<Character, Integer> implements Serializable {
 	
 	public CPoint(char x, int y) {
 		super(x, y);
@@ -12,7 +14,18 @@ public class CPoint extends Couple<Character, Integer> {
 		super();
 	}
 	
-	public Point convertToPoint() {
-		return new Point('A' - getX(), getY());
+	public static Point toPoint(CPoint cpoint) {
+		if (cpoint == null)
+			return null;
+		return new Point((int) (cpoint.getX() - 'A'), 8 - cpoint.getY());
+	}
+	
+	public static CPoint fromPoint(Point point) {
+		if (point == null)
+			return null;
+		return new CPoint((char) (point.getX() + 'A'), 8 - point.getY());
+	}
+	public static CPoint fromPoint(int x, int y) {
+		return fromPoint(new Point(x, y));
 	}
 }

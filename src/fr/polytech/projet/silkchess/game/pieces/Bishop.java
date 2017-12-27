@@ -11,6 +11,9 @@ public class Bishop extends Piece {
 	public Bishop(Color color) {
 		super(color);
 	}
+	public Bishop(CPoint position) {
+		super(position);
+	}
 	public Bishop() {
 		super();
 	}
