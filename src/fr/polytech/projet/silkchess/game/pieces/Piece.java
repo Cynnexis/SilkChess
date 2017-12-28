@@ -1,6 +1,7 @@
 package fr.polytech.projet.silkchess.game.pieces;
 
 import com.sun.istack.internal.NotNull;
+import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.game.CPoint;
 import fr.polytech.projet.silkchess.game.Color;
 
@@ -9,6 +10,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public abstract class Piece implements Serializable, Movable, Transferable {
@@ -35,6 +37,11 @@ public abstract class Piece implements Serializable, Movable, Transferable {
 	public Piece() {
 		setColor(Color.BLACK);
 		setPosition(new CPoint());
+	}
+	
+	public boolean canMove(CPoint destination) {
+		ArrayList<CPoint> list = possibleMoves();
+		return list.contains(destination);
 	}
 	
 	/* GETTERS & SETTERS */

@@ -5,6 +5,8 @@ import fr.polytech.projet.silkchess.debug.Debug;
 import fr.polytech.projet.silkchess.game.CPoint;
 import fr.polytech.projet.silkchess.game.Color;
 import fr.polytech.projet.silkchess.game.pieces.*;
+import fr.polytech.projet.silkchess.ui.preferences.EPref;
+import fr.polytech.projet.silkchess.ui.preferences.Pref;
 
 import javax.swing.*;
 import java.awt.*;
@@ -62,23 +64,27 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 	/* MouseListener Events */
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		/*if (e == null)
-			e = new MouseEvent(this, MouseEvent.MOUSE_CLICKED, 0, InputEvent.BUTTON1_DOWN_MASK, 0, 0, 1, false);
-		
-		if (actionListeners != null && actionListeners.size() > 0)
-			for (ActionListener al : actionListeners)
-				if (al != null)
-					al.actionPerformed(new ActionEvent(e.getSource(), e.getID(), e.paramString()));*/
+		if (Pref.getPreferences().getBoolean(EPref.CHESSBOARD_CONTROL.getKey(), (boolean) EPref.CHESSBOARD_CONTROL.getDefaultValue())) {
+			if (e == null)
+				e = new MouseEvent(this, MouseEvent.MOUSE_CLICKED, 0, InputEvent.BUTTON1_DOWN_MASK, 0, 0, 1, false);
+			
+			if (actionListeners != null && actionListeners.size() > 0)
+				for (ActionListener al : actionListeners)
+					if (al != null)
+						al.actionPerformed(new ActionEvent(e.getSource(), e.getID(), e.paramString()));
+		}
 	}
 	
 	@Override
 	public void mousePressed(MouseEvent e) {
-		JComponent comp = (JComponent) e.getSource();
-		TileTransferHandler th = (TileTransferHandler) comp.getTransferHandler();
-		
-		Debug.println("Tile.mousePressed> comp: (Tile) (Piece) " + ((Tile) comp).getPiece().toString() + "\n\tth: " + th.toString() + "\n\te: " + e.toString());
-		
-		th.exportAsDrag(this, e, TransferHandler.MOVE);
+		if (Pref.getPreferences().getBoolean(EPref.CHESSBOARD_CONTROL.getKey(), (boolean) EPref.CHESSBOARD_CONTROL.getDefaultValue())) {
+			JComponent comp = (JComponent) e.getSource();
+			TileTransferHandler th = (TileTransferHandler) comp.getTransferHandler();
+			
+			Debug.println("Tile.mousePressed> comp: (Tile) (Piece) " + ((Tile) comp).getPiece().toString() + "\n\tth: " + th.toString() + "\n\te: " + e.toString());
+			
+			th.exportAsDrag(this, e, TransferHandler.MOVE);
+		}
 	}
 	
 	@Override

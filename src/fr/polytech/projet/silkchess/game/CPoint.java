@@ -28,4 +28,9 @@ public class CPoint extends Couple<Character, Integer> implements Serializable {
 	public static CPoint fromPoint(int x, int y) {
 		return fromPoint(new Point(x, y));
 	}
+	
+	@Override
+	public String toString() {
+		return "(" + (getX() != null ? getX().toString() : "(null)") + " ; " + (getY() != null ? getY().toString() : "(null)") + ")";
+	}
 }

@@ -4,9 +4,10 @@ import com.sun.istack.internal.NotNull;
 import fr.berger.enhancedlist.Matrix;
 import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.game.CPoint;
-import fr.polytech.projet.silkchess.game.pieces.NoPiece;
-import fr.polytech.projet.silkchess.game.pieces.Piece;
-import fr.polytech.projet.silkchess.game.pieces.Rook;
+import fr.polytech.projet.silkchess.game.Color;
+import fr.polytech.projet.silkchess.game.pieces.*;
+
+import java.util.ArrayList;
 
 /**
  * Chessboard Class.
@@ -84,8 +85,25 @@ public class Chessboard extends Matrix<Piece> {
 		return this.set(new CPoint(x, y), value);
 	}
 	
-	public <T extends Piece> T search(T piece) {
-		//if (piece instanceof )
-		return null;
+	public <T extends Piece> ArrayList<CPoint> search(T piece, Color color) {
+		ArrayList<CPoint> list = new ArrayList<>();
+		
+		for (int i = 0; i < getNbColumns(); i++)
+		{
+			for (int j = 0; j < getNbRows(); j++)
+			{
+				Piece currentP = this.get(i, j);
+				if ((currentP instanceof King && piece instanceof King) ||
+						(currentP instanceof Queen && piece instanceof Queen) ||
+						(currentP instanceof Rook && piece instanceof Rook) ||
+						(currentP instanceof Bishop && piece instanceof Bishop) ||
+						(currentP instanceof Knight && piece instanceof Knight) ||
+						(currentP instanceof Pawn && piece instanceof Pawn)
+						&& (currentP.getColor() == color))
+					list.add(currentP.getPosition());
+			}
+		}
+		
+		return list;
 	}
 }
