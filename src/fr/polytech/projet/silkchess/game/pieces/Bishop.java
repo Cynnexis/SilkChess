@@ -28,12 +28,20 @@ public class Bishop extends Piece {
 		
 		// Compute all possible points
 		ArrayList<Point> points = new ArrayList<>();
-		for (int i = 0; i <= 8 ; i++) {
-			if (src.getX() != i && src.getY() != i) {
-				points.add(new Point(i - (src.getY() - src.getX()), i - (src.getY() - src.getX()))); // Diagonal Decreasing
-				points.add(new Point(src.getY() + src.getX() - i, src.getX() + src.getY() - i)); // Diagonal Increasing
-			}
-		}
+		
+		/* Diagonal Decreasing */
+		for (int i = src.getX() + 1, j = src.getY() + 1; i <= 8 && j <= 8; i++, j++)
+			points.add(new Point(i, j));
+		
+		for (int i = src.getX() - 1, j = src.getY() - 1; i >= 0 && j >= 0; i--, j--)
+			points.add(new Point(i, j));
+		
+		/* Diagonal Increasing */
+		for (int i = src.getX() + 1, j = src.getY() - 1; i <= 8 && j <= 8; i++, j--)
+			points.add(new Point(i, j));
+		
+		for (int i = src.getX() - 1, j = src.getY() + 1; i >= 0 && j >= 0; i--, j++)
+			points.add(new Point(i, j));
 		
 		deletePointsOutOfGrid(points);
 		

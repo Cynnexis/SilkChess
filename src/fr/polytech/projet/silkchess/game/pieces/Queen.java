@@ -27,23 +27,14 @@ public class Queen extends Piece {
 		Point src = CPoint.toPoint(getPosition());
 		
 		// Compute all possible points
-		ArrayList<Point> points = new ArrayList<>();
-		for (int i = 0; i < 8 ; i++) {
-			if (src.getX() != i)
-				points.add(new Point(i, src.getY())); // Row
-			
-			if (src.getY() != i)
-				points.add(new Point(src.getX(), i)); // Column
-			
-			if (src.getX() != i && src.getY() != i) {
-				points.add(new Point(i - (src.getY() - src.getX()), i - (src.getY() - src.getX()))); // Diagonal Decreasing
-				points.add(new Point(src.getY() + src.getX() - i, src.getX() + src.getY() - i)); // Diagonal Increasing
-			}
-		}
+		Rook rook = new Rook(getColor(), getPosition());
+		list.addAll(rook.possibleMoves());
 		
-		deletePointsOutOfGrid(points);
+		Bishop bishop = new Bishop(getColor(), getPosition());
+		list.addAll(bishop.possibleMoves());
 		
-		// Changing all Point to CPoint
-		return PointsToCPoints(points);
+		deleteCPointsOutOfGrid(list);
+		
+		return list;
 	}
 }

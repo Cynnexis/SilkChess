@@ -1,9 +1,14 @@
 package fr.polytech.projet.silkchess.ui.preferences;
 
 import com.sun.istack.internal.NotNull;
+import fr.polytech.projet.silkchess.ui.preferences.generator.Generator;
 
 import java.util.prefs.Preferences;
 
+/**
+ * @author Valentin Berger
+ * @see Generator
+ */
 public class Pref {
 	
 	/**
@@ -24,55 +29,70 @@ public class Pref {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static <T> T get(EPref ePref) {
-		try {
-			if (ePref.getAssociatedValueClass().isInstance(""))
-				return (T) ePref.getAssociatedValueClass().cast(preferences.get(ePref.getKey(), (String) ePref.getDefaultValue()));
-			
-			if (ePref.getAssociatedValueClass().isInstance(true))
-				return (T) ePref.getAssociatedValueClass().cast(preferences.getBoolean(ePref.getKey(), (boolean) ePref.getDefaultValue()));
-			
-			if (ePref.getAssociatedValueClass().isInstance(new byte[0]))
-				return (T) ePref.getAssociatedValueClass().cast(preferences.getByteArray(ePref.getKey(), (byte[]) ePref.getDefaultValue()));
-			
-			if (ePref.getAssociatedValueClass().isInstance(1.0d))
-				return (T) ePref.getAssociatedValueClass().cast(preferences.getDouble(ePref.getKey(), (double) ePref.getDefaultValue()));
-			
-			if (ePref.getAssociatedValueClass().isInstance(1.0f))
-				return (T) ePref.getAssociatedValueClass().cast(preferences.getFloat(ePref.getKey(), (float) ePref.getDefaultValue()));
-			
-			if (ePref.getAssociatedValueClass().isInstance(1))
-				return (T) ePref.getAssociatedValueClass().cast(preferences.getInt(ePref.getKey(), (int) ePref.getDefaultValue()));
-			
-			if (ePref.getAssociatedValueClass().isInstance(1L))
-				return (T) ePref.getAssociatedValueClass().cast(preferences.getLong(ePref.getKey(), (long) ePref.getDefaultValue()));
-		} catch (ClassCastException ex) {
-			ex.printStackTrace();
-		}
-		
-		return null;
+	public static String getString(@NotNull EPref ePref) {
+		return preferences.get(ePref.getKey(), (String) ePref.getDefaultValue());
 	}
 	
-	public static <T> void set(EPref ePref, T value) {
-		try {
-			if (ePref.getAssociatedValueClass().isInstance(""))
-				preferences.put(ePref.getKey(), (String) ePref.getAssociatedValueClass().cast(value));
-			else if (ePref.getAssociatedValueClass().isInstance(true))
-				preferences.putBoolean(ePref.getKey(), (Boolean) ePref.getAssociatedValueClass().cast(value));
-			else if (ePref.getAssociatedValueClass().isInstance(new byte[0]))
-				preferences.putByteArray(ePref.getKey(), (byte[]) ePref.getAssociatedValueClass().cast(value));
-			else if (ePref.getAssociatedValueClass().isInstance(1.0d))
-				preferences.putDouble(ePref.getKey(), (Double) ePref.getAssociatedValueClass().cast(value));
-			else if (ePref.getAssociatedValueClass().isInstance(1.0f))
-				preferences.putFloat(ePref.getKey(), (Float) ePref.getAssociatedValueClass().cast(value));
-			else if (ePref.getAssociatedValueClass().isInstance(1))
-				preferences.putInt(ePref.getKey(), (Integer) ePref.getAssociatedValueClass().cast(value));
-			else if (ePref.getAssociatedValueClass().isInstance(1L))
-				preferences.putLong(ePref.getKey(), (Long) ePref.getAssociatedValueClass().cast(value));
-		} catch (ClassCastException ex) {
-			ex.printStackTrace();
-		}
+	public static boolean getBoolean(@NotNull EPref ePref) {
+		return preferences.getBoolean(ePref.getKey(), (boolean) ePref.getDefaultValue());
+	}
+	
+	public static byte[] getByteArray(@NotNull EPref ePref) {
+		return preferences.getByteArray(ePref.getKey(), (byte[]) ePref.getDefaultValue());
+	}
+	
+	public static double getDouble(@NotNull EPref ePref) {
+		return preferences.getDouble(ePref.getKey(), (double) ePref.getDefaultValue());
+	}
+	
+	public static float getFloat(@NotNull EPref ePref) {
+		return preferences.getFloat(ePref.getKey(), (float) ePref.getDefaultValue());
+	}
+	
+	public static int getInt(@NotNull EPref ePref) {
+		return preferences.getInt(ePref.getKey(), (int) ePref.getDefaultValue());
+	}
+	
+	public static long getLong(@NotNull EPref ePref) {
+		return preferences.getLong(ePref.getKey(), (long) ePref.getDefaultValue());
+	}
+	
+	public static <T extends Generator> T getObject(@NotNull EPref ePref, @NotNull T instance) {
+		instance.fromString(preferences.get(ePref.getKey(), (String) ePref.getDefaultValue()));
+		return instance;
+	}
+	
+	
+	public static void putString(@NotNull EPref ePref, @NotNull String value) {
+		preferences.put(ePref.getKey(), value);
+	}
+	
+	public static void putBoolean(@NotNull EPref ePref, boolean value) {
+		preferences.putBoolean(ePref.getKey(), value);
+	}
+	
+	public static void putByteArray(@NotNull EPref ePref, @NotNull byte[] value) {
+		preferences.putByteArray(ePref.getKey(), value);
+	}
+	
+	public static void putDouble(@NotNull EPref ePref, double value) {
+		preferences.putDouble(ePref.getKey(), value);
+	}
+	
+	public static void putFloat(@NotNull EPref ePref, float value) {
+		preferences.putFloat(ePref.getKey(), value);
+	}
+	
+	public static void putInt(@NotNull EPref ePref, int value) {
+		preferences.putInt(ePref.getKey(), value);
+	}
+	
+	public static void putLong(@NotNull EPref ePref, long value) {
+		preferences.putLong(ePref.getKey(), value);
+	}
+	
+	public static <T extends Generator> void putObject(@NotNull EPref ePref, @NotNull T value) {
+		preferences.put(ePref.getKey(), value.convertToString());
 	}
 	
 	/* GETTER & SETTER */
@@ -81,7 +101,7 @@ public class Pref {
 		return instance;
 	}
 	
-	private static void setInstance(Pref pref1) {
+	private static void setInstance(@NotNull Pref pref1) {
 		instance = pref1;
 	}
 	

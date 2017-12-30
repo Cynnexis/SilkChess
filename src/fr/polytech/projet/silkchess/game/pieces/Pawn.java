@@ -28,7 +28,6 @@ public class Pawn extends Piece {
 		
 		// Compute all possible points
 		ArrayList<Point> points = new ArrayList<>();
-		// Top-right corner
 		points.add(new Point(src.getX(), src.getY() + (getColor() == Color.BLACK ? +1 : -1)));
 		
 		deletePointsOutOfGrid(points);

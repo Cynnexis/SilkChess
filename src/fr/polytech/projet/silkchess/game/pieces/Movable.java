@@ -7,6 +7,11 @@ import java.util.ArrayList;
 
 public interface Movable {
 	
+	/**
+	 * Compute all possibles moves from the position of the piece, regardless of the board (the positions of the others
+	 * pieces and the special rules)
+	 * @return
+	 */
 	ArrayList<CPoint> possibleMoves();
 	
 	default void deletePointsOutOfGrid(ArrayList<Point> points) {
@@ -18,6 +23,10 @@ public interface Movable {
 				i--;
 			}
 		}
+	}
+	
+	default void deleteCPointsOutOfGrid(ArrayList<CPoint> points) {
+		deletePointsOutOfGrid(CPointsToPoints(points));
 	}
 	
 	default ArrayList<CPoint> PointsToCPoints(ArrayList<Point> points) {

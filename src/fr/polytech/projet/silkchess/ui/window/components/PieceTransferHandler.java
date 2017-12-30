@@ -11,6 +11,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.util.Comparator;
 
+@Deprecated
 public class PieceTransferHandler extends TransferHandler {
 	
 	/**

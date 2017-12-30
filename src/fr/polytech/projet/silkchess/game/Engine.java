@@ -8,6 +8,7 @@ import fr.polytech.projet.silkchess.game.exceptions.PieceCannotMove;
 import fr.polytech.projet.silkchess.game.exceptions.PieceDoesNotBelongToPlayerException;
 import fr.polytech.projet.silkchess.game.exceptions.TileFullException;
 import fr.polytech.projet.silkchess.game.pieces.*;
+import fr.polytech.projet.silkchess.ui.window.components.Tile;
 import org.omg.PortableServer.THREAD_POLICY_ID;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -71,7 +72,7 @@ public class Engine implements Serializable {
 		if (!(destpiece instanceof NoPiece))
 			throw new TileFullException(destpiece.getPosition());
 		
-		if (!srcpiece.canMove(CPoint.fromPoint(new Point(xdest, ydest))))
+		if (!canMove(CPoint.fromPoint(xsrc, ysrc), CPoint.fromPoint(xdest, ydest)))
 			throw new PieceCannotMove(srcpiece, new Point(xdest, ydest));
 		
 		move(srcpiece, destpiece.getPosition());
@@ -88,17 +89,21 @@ public class Engine implements Serializable {
 		play(CPoint.toPoint(src), CPoint.toPoint(dest));
 	}
 	
-	public boolean canMove(Piece piece, CPoint dest) throws NotImplementedException {
-		// TODO: Enhance this method, it does not check if a piece is in the way, or if a piece can kill another
-		return piece.canMove(dest);
+	public boolean canMove(@NotNull CPoint point, @NotNull CPoint dest) throws NotImplementedException {
+		try {
+			return computeAllPossibleMove(point).contains(dest);
+		} catch (NoPieceException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 	
-	private void move(Piece src, CPoint dest) {
+	private void move(@NotNull Piece src, @NotNull CPoint dest) {
 		board.set(dest, src);
 		board.set(src.getPosition(), new NoPiece(src.getPosition()));
 		board.get(dest).setPosition(dest);
 	}
-	private void move(Piece piece, Point dest) {
+	private void move(@NotNull Piece piece, @NotNull Point dest) {
 		move(piece, CPoint.fromPoint(dest));
 	}
 	
@@ -128,7 +133,7 @@ public class Engine implements Serializable {
 		for (Piece checkPiece : allPieces) {
 			list = board.search(checkPiece, color);
 			for (CPoint c : list) {
-				if (canMove(board.get(c), foeKing))
+				if (canMove(c, foeKing))
 				{
 					// TODO: Finish this method
 					
@@ -138,6 +143,135 @@ public class Engine implements Serializable {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Compute all possible move of the piece located at {@code position}, regarding the board and all special rules,
+	 * unlike the method {@code Piece.possibleMoves()}.
+	 * @param position The position of the piece to compute
+	 * @return Return the list of possible points
+	 * @throws NoPieceException Throw this exception if the piece at the location {@code position} is an instance of
+	 * {@code NoPiece}
+	 * @see Piece
+	 * @see fr.polytech.projet.silkchess.game.pieces.Movable
+	 * @see NoPiece
+	 * @see CPoint
+	 */
+	public ArrayList<CPoint> computeAllPossibleMove(@NotNull CPoint position, @NotNull SpecialMove sm) throws NoPieceException {
+		if (position == null)
+			return null;
+		
+		if (sm == null)
+			sm = SpecialMove.NOTHING;
+		
+		Piece piece = getBoard().get(CPoint.toPoint(position));
+		
+		if (piece instanceof NoPiece)
+			throw new NoPieceException(position);
+		
+		ArrayList<CPoint> list = piece.possibleMoves();
+		
+		if (piece instanceof King)
+		{
+			deleteAlliesPositions(piece, list);
+			
+			// TODO: The king cannot go to a place where it can place its team in a CHECK state
+			// TODO: if `sm == SpecialMove.CASTLING`, add the castling tile
+		}
+		else if (piece instanceof Queen)
+		{
+			// SO COMPLICATED
+		}
+		else if (piece instanceof Rook)
+		{
+			// SO COMPLICATED
+		}
+		else if (piece instanceof Bishop)
+		{
+			// SO COMPLICATED
+		}
+		else if (piece instanceof Knight)
+		{
+			deleteAlliesPositions(piece, list);
+		}
+		else if (piece instanceof Pawn)
+		{
+			boolean canMoveForward = true;
+			
+			Point point = CPoint.toPoint(piece.getPosition());
+			
+			// Get the only available position:
+			Point pos = CPoint.toPoint(list.get(0));
+			
+			// If this position is occupied by an ally, the pawn cannot go there
+			if (getBoard().get(pos).getColor() == piece.getColor() && !(getBoard().get(pos) instanceof NoPiece)) {
+				list.remove(0);
+				canMoveForward = false;
+			}
+			
+			// Special move: First move
+			if (sm == SpecialMove.FIRST_MOVE && canMoveForward) {
+				list.add(CPoint.fromPoint(point.getX(), point.getY() + (piece.getColor() == Color.BLACK ? +2 : -2)));
+			}
+			
+			// Special move: Promotion
+			// TODO: The special move Promotion must be moved somewhere else
+			if ((piece.getColor() == Color.BLACK && point.getY() == getBoard().getNbRows()-1) ||
+					(piece.getColor() == Color.WHITE && point.getY() == 0))
+			{
+				Queen queen = new Queen(piece.getColor(), piece.getPosition());
+				getBoard().set(piece.getPosition(), queen);
+			}
+			
+			// Special move: En passant
+			Point check = new Point();
+			switch (piece.getColor())
+			{
+				case BLACK:
+					check = new Point(point.getX() - 1, point.getY() + 1);
+					if (getBoard().get(check).getColor() == Color.WHITE && !(getBoard().get(pos) instanceof NoPiece)) {
+						list.add(CPoint.fromPoint(check));
+						break;
+					}
+					
+					check = new Point(point.getX() + 1, point.getY() + 1);
+					if (getBoard().get(check).getColor() == Color.WHITE && !(getBoard().get(pos) instanceof NoPiece)) {
+						list.add(CPoint.fromPoint(check));
+						break;
+					}
+					break;
+				case WHITE:
+					check = new Point(point.getX() - 1, point.getY() - 1);
+					if (getBoard().get(check).getColor() == Color.BLACK && !(getBoard().get(pos) instanceof NoPiece)) {
+						list.add(CPoint.fromPoint(check));
+						break;
+					}
+					
+					check = new Point(point.getX() + 1, point.getY() - 1);
+					if (getBoard().get(check).getColor() == Color.BLACK && !(getBoard().get(pos) instanceof NoPiece)) {
+						list.add(CPoint.fromPoint(check));
+						break;
+					}
+					break;
+			}
+		}
+		
+		return list;
+	}
+	
+	private void deleteAlliesPositions(Piece piece, ArrayList<CPoint> list) {
+		for (int i = 0; i < list.size(); i++) {
+			Point p = CPoint.toPoint(list.get(i));
+			// If the possible tile where the knight can go is a piece of the same color of the knight, then it cannot go there
+			if (getBoard().get(p).getColor() == piece.getColor() && !(getBoard().get(p) instanceof NoPiece)) {
+				list.remove(i);
+				i--;
+			}
+		}
+	}
+	
+	public ArrayList<CPoint> computeAllPossibleMove(@NotNull CPoint position) throws NoPieceException {
+		return computeAllPossibleMove(position, SpecialMove.NOTHING);
 	}
 	
 	/* GETTERS & SETTERS */

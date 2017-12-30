@@ -1,19 +1,23 @@
 package fr.polytech.projet.silkchess.ui.window.components;
 
+import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
 import fr.berger.enhancedlist.Matrix;
 import fr.berger.enhancedlist.MatrixListener;
 import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.game.CPoint;
 import fr.polytech.projet.silkchess.game.Color;
+import fr.polytech.projet.silkchess.game.SpecialMove;
 import fr.polytech.projet.silkchess.game.board.Chessboard;
-import fr.polytech.projet.silkchess.game.pieces.NoPiece;
-import fr.polytech.projet.silkchess.game.pieces.Piece;
+import fr.polytech.projet.silkchess.game.exceptions.NoPieceException;
+import fr.polytech.projet.silkchess.game.pieces.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class JChessboard extends JPanel implements Serializable {
 	
@@ -22,6 +26,15 @@ public class JChessboard extends JPanel implements Serializable {
 	private JPanel p_board = new JPanel();
 	private JPanel p_xlabel = new JPanel();
 	private JPanel p_ylabel = new JPanel();
+	
+	@Nullable
+	private Tile selectedTile = null;
+	
+	@NotNull
+	private JChessboardListener jChessboardListener = new JChessboardListener() {
+		@Override
+		public void onSelectedTileChanged(Tile tile) { }
+	};
 	
 	public JChessboard(int nbColumns, int nbRows) {
 		p_board.setLayout(new GridLayout(nbColumns, nbRows));
@@ -67,6 +80,30 @@ public class JChessboard extends JPanel implements Serializable {
 						ex.printStackTrace();
 					}
 				});
+				t.setTileListener(new TileListener() {
+					@Override
+					public void onColorChanged(Color color) { }
+					
+					@Override
+					public void onPieceChanged(Piece piece) { }
+					
+					@Override
+					public void onTileDropBegin(Tile startTile) {
+						if (startTile != null) {
+							if (startTile.equals(selectedTile))
+								selectedTile = null;
+							else
+								selectedTile = startTile;
+							
+							jChessboardListener.onSelectedTileChanged(selectedTile);
+						}
+					}
+					
+					@Override
+					public void onTileDropStop(Tile stopTile) {
+						// TODO: Do something
+					}
+				});
 				board.set(j, i, t);
 				p_board.add(t);
 			}
@@ -105,7 +142,7 @@ public class JChessboard extends JPanel implements Serializable {
 	
 	public void set(Chessboard chessboard) {
 		for (int i = 0; i < chessboard.getNbColumns(); i++) {
-			for (int j = 0; j < chessboard.getNbColumns(); j++) {
+			for (int j = 0; j < chessboard.getNbRows(); j++) {
 				set(i, j, chessboard.get(i, j));
 			}
 		}
@@ -122,6 +159,18 @@ public class JChessboard extends JPanel implements Serializable {
 		}
 	}
 	
+	public void hightlightTile(Point point) {
+		getBoard().get(point).setBackground(java.awt.Color.BLUE);
+	}
+	
+	public void resetHightlight() {
+		for (int i = 0; i < getBoard().getNbColumns(); i++) {
+			for (int j = 0; j < getBoard().getNbRows(); j++) {
+				getBoard().get(i, j).resetColor();
+			}
+		}
+	}
+	
 	/* GETTERS & SETTERS */
 	
 	public Matrix<Tile> getBoard() {
@@ -130,5 +179,16 @@ public class JChessboard extends JPanel implements Serializable {
 	
 	public void setBoard(Matrix<Tile> board) {
 		this.board = board;
+	}
+	
+	public JChessboardListener getJChessboardListener() {
+		return jChessboardListener;
+	}
+	
+	public void setJChessboardListener(@NotNull JChessboardListener jChessboardListener) {
+		this.jChessboardListener = jChessboardListener != null ? jChessboardListener : new JChessboardListener() {
+			@Override
+			public void onSelectedTileChanged(Tile tile) { }
+		};
 	}
 }

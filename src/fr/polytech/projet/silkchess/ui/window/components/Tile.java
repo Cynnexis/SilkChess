@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class Tile extends JPanel implements MouseListener, Serializable, Transferable, DropTargetListener {
 	
@@ -39,6 +40,10 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 		public void onColorChanged(Color color) { }
 		@Override
 		public void onPieceChanged(Piece piece) { }
+		@Override
+		public void onTileDropBegin(Tile startTile) { }
+		@Override
+		public void onTileDropStop(Tile stopTile) { }
 	};
 	
 	public Tile() {
@@ -61,10 +66,16 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 		this.setTransferHandler(new TileTransferHandler());
 	}
 	
+	public void resetColor() {
+		setColor(getColor());
+	}
+	
 	/* MouseListener Events */
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (Pref.getPreferences().getBoolean(EPref.CHESSBOARD_CONTROL.getKey(), (boolean) EPref.CHESSBOARD_CONTROL.getDefaultValue())) {
+		if (!Pref.getBoolean(EPref.CHESSBOARD_CONTROL)) {
+			tileListener.onTileDropBegin(this);
+			
 			if (e == null)
 				e = new MouseEvent(this, MouseEvent.MOUSE_CLICKED, 0, InputEvent.BUTTON1_DOWN_MASK, 0, 0, 1, false);
 			
@@ -77,7 +88,9 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 	
 	@Override
 	public void mousePressed(MouseEvent e) {
-		if (Pref.getPreferences().getBoolean(EPref.CHESSBOARD_CONTROL.getKey(), (boolean) EPref.CHESSBOARD_CONTROL.getDefaultValue())) {
+		if (Pref.getBoolean(EPref.CHESSBOARD_CONTROL)) {
+			tileListener.onTileDropBegin(this);
+			
 			JComponent comp = (JComponent) e.getSource();
 			TileTransferHandler th = (TileTransferHandler) comp.getTransferHandler();
 			
@@ -148,6 +161,10 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 			public void onColorChanged(Color color) { }
 			@Override
 			public void onPieceChanged(Piece piece) { }
+			@Override
+			public void onTileDropBegin(Tile startTile) { }
+			@Override
+			public void onTileDropStop(Tile stopTile) { }
 		};
 	}
 	
@@ -207,6 +224,28 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 	}
 	
 	/* OVERRIDES */
+	
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Tile)) return false;
+		Tile tile = (Tile) o;
+		return getColor() == tile.getColor() &&
+				Objects.equals(getPiece(), tile.getPiece());
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(getColor(), getPiece());
+	}
+	
+	@Override
+	public String toString() {
+		return "Tile{" +
+				"color=" + color +
+				", piece=" + piece +
+				'}';
+	}
 	
 	@Override
 	public DataFlavor[] getTransferDataFlavors() {
