@@ -106,4 +106,26 @@ public class Chessboard extends Matrix<Piece> {
 		
 		return list;
 	}
+	
+	public ArrayList<Piece> getAll() {
+		ArrayList<Piece> pieces = new ArrayList<>();
+		for (int i = 0; i < getNbColumns(); i++) {
+			for (int j = 0; j < getNbRows(); j++) {
+				Piece p = get(i, j);
+				if (!(p instanceof NoPiece))
+					pieces.add(p);
+			}
+		}
+		return pieces;
+	}
+	public ArrayList<Piece> getAll(Color color) {
+		ArrayList<Piece> pieces = getAll();
+		for (int i = 0; i < pieces.size(); i++) {
+			if (pieces.get(i).getColor() != color) {
+				pieces.remove(i);
+				i--;
+			}
+		}
+		return pieces;
+	}
 }

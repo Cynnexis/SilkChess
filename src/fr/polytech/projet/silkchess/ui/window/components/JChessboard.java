@@ -69,7 +69,7 @@ public class JChessboard extends JPanel implements Serializable {
 			for (int j = 0; j < nbRows; j++)
 			{
 				Tile t = new Tile(((i % 2 == 0 && j % 2 == 1) || ((i % 2 == 1 && j % 2 == 0)) ? Color.BLACK : Color.WHITE), new NoPiece(CPoint.fromPoint(j, i)));
-				t.addActionListener((ActionListener & Serializable) (ActionEvent e) -> {
+				/*t.addActionListener((ActionListener & Serializable) (ActionEvent e) -> {
 					try {
 						Piece p = ((Tile) e.getSource()).getPiece();
 						if (p != null && p.getPosition() != null) {
@@ -79,7 +79,7 @@ public class JChessboard extends JPanel implements Serializable {
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
-				});
+				});*/
 				t.setTileListener(new TileListener() {
 					@Override
 					public void onColorChanged(Color color) { }
@@ -138,24 +138,37 @@ public class JChessboard extends JPanel implements Serializable {
 		this.add(p_xlabel, BorderLayout.NORTH);
 		this.add(p_board, BorderLayout.CENTER);
 		this.add(p_ylabel, BorderLayout.WEST);
+		
+		this.setBorder(new EmptyBorder(5, 5, 5, 5));
 	}
 	
-	public void set(Chessboard chessboard) {
-		for (int i = 0; i < chessboard.getNbColumns(); i++) {
-			for (int j = 0; j < chessboard.getNbRows(); j++) {
-				set(i, j, chessboard.get(i, j));
+	public void set(@NotNull Chessboard chessboard) {
+		if (chessboard != null) {
+			for (int i = 0; i < chessboard.getNbColumns(); i++) {
+				for (int j = 0; j < chessboard.getNbRows(); j++) {
+					try {
+						Piece piece = chessboard.get(i, j);
+						set(i, j, piece != null ? piece : new NoPiece(CPoint.fromPoint(i, j)));
+					} catch (IndexOutOfBoundsException ignored) { }
+				}
 			}
 		}
 	}
 	
-	public void set(int x, int y, Piece piece) {
-		if (board != null && board.get(x, y) != null)
-			board.get(x, y).setPiece(piece);
-		
-		if (p_board != null) {
-			Tile t = ((Tile) p_board.getComponentAt(x, y));
-			if (t != null)
-				t.setPiece(piece);
+	public void set(int x, int y, @NotNull Piece piece) {
+		if (piece != null) {
+			if (board != null && board.get(x, y) != null)
+				board.get(x, y).setPiece(piece);
+			
+			if (p_board != null) {
+				try {
+					Tile t = ((Tile) p_board.getComponent(x + y * getBoard().getNbColumns()));
+					if (t != null)
+						t.setPiece(piece);
+				} catch (ClassCastException ex) {
+					ex.printStackTrace();
+				}
+			}
 		}
 	}
 	
@@ -179,6 +192,14 @@ public class JChessboard extends JPanel implements Serializable {
 	
 	public void setBoard(Matrix<Tile> board) {
 		this.board = board;
+	}
+	
+	public Tile getSelectedTile() {
+		return selectedTile;
+	}
+	
+	public void setSelectedTile(Tile selectedTile) {
+		this.selectedTile = selectedTile;
 	}
 	
 	public JChessboardListener getJChessboardListener() {

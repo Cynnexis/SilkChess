@@ -1,7 +1,9 @@
 package fr.polytech.projet.silkchess.game;
 
 import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
 import fr.berger.enhancedlist.Point;
+import fr.polytech.projet.silkchess.debug.Debug;
 import fr.polytech.projet.silkchess.game.board.Chessboard;
 import fr.polytech.projet.silkchess.game.exceptions.NoPieceException;
 import fr.polytech.projet.silkchess.game.exceptions.PieceCannotMove;
@@ -17,10 +19,30 @@ import java.util.ArrayList;
 
 public class Engine implements Serializable {
 	
+	@NotNull
 	private Chessboard board = new Chessboard();
+	@NotNull
 	private GameState state = GameState.INITIALIZING;
+	@NotNull
 	private CheckState check = CheckState.NO_CHECKSTATE;
+	@NotNull
 	private Color token = Color.WHITE;
+	@NotNull
+	private Player pBlack = new Player(Color.BLACK);
+	@NotNull
+	private Player pWhite = new Player(Color.WHITE);
+	
+	@NotNull
+	private EngineListener engineListener = new EngineListener() {
+		@Override
+		public void onPieceMoved(CPoint source, Piece piece) { }
+		@Override
+		public void onTokenChanged(Color token) { }
+		@Override
+		public void onGameStateChanged(GameState oldState, GameState newState) { }
+		@Override
+		public void onPieceKilled(Piece pieceKilled) { }
+	};
 	
 	public Engine() {
 	
@@ -54,38 +76,45 @@ public class Engine implements Serializable {
 		board.set('F', 1, new Bishop(Color.WHITE, new CPoint('F', 1)));
 		board.set('G', 1, new Knight(Color.WHITE, new CPoint('G', 1)));
 		board.set('H', 1, new Rook(Color.WHITE, new CPoint('H', 1)));
+		
+		// Reset the token to fire onTokenChanged event
+		setToken(getToken());
 	}
 	
-	public void play(int xsrc, int ysrc, int xdest, int ydest) throws NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
+	@SuppressWarnings("SpellCheckingInspection")
+	public void play(int xsrc, int ysrc, int xdest, int ydest) throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
 		Piece srcpiece = board.get(xsrc, ysrc);
 		Piece destpiece = board.get(xdest, ydest);
 		
-		if (srcpiece == null || srcpiece.getPosition() == null || srcpiece instanceof NoPiece)
+		if (srcpiece == null || srcpiece.getPosition() == null || destpiece == null || destpiece.getPosition() == null)
+			throw new NullPointerException();
+		
+		if (srcpiece instanceof NoPiece)
 			throw new NoPieceException(srcpiece.getPosition());
 		
 		if (srcpiece.getColor() != token)
 			throw new PieceDoesNotBelongToPlayerException(srcpiece, token);
 		
-		if (destpiece == null || destpiece.getPosition() == null)
-			throw new NoPieceException(destpiece.getPosition());
-		
-		if (!(destpiece instanceof NoPiece))
-			throw new TileFullException(destpiece.getPosition());
+		/*if (!(destpiece instanceof NoPiece))
+			throw new TileFullException(destpiece.getPosition());*/
 		
 		if (!canMove(CPoint.fromPoint(xsrc, ysrc), CPoint.fromPoint(xdest, ydest)))
 			throw new PieceCannotMove(srcpiece, new Point(xdest, ydest));
 		
 		move(srcpiece, destpiece.getPosition());
 		
+		getCurrentPlayer().setNbRound(getCurrentPlayer().getNbRound() + 1);
+		
 		invertToken();
 	}
-	public void play(@NotNull Point src, @NotNull Point dest) throws NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
+	public void play(@NotNull Point src, @NotNull Point dest) throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
 		play(src.getX(), src.getY(), dest.getX(), dest.getY());
 	}
-	public void play(char xsrc, int ysrc, char xdest, int ydest) throws NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
+	@SuppressWarnings("SpellCheckingInspection")
+	public void play(char xsrc, int ysrc, char xdest, int ydest) throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
 		play(new CPoint(xsrc, ysrc), new CPoint(xdest, ydest));
 	}
-	public void play(@NotNull CPoint src, @NotNull CPoint dest) throws NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
+	public void play(@NotNull CPoint src, @NotNull CPoint dest) throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
 		play(CPoint.toPoint(src), CPoint.toPoint(dest));
 	}
 	
@@ -99,16 +128,18 @@ public class Engine implements Serializable {
 	}
 	
 	private void move(@NotNull Piece src, @NotNull CPoint dest) {
+		if (!(board.get(dest) instanceof NoPiece))
+		{
+			getCurrentPlayer().kill(board.get(dest));
+			Debug.println(board.get(dest).toString() + " added to graveyard");
+		}
+		
 		board.set(dest, src);
 		board.set(src.getPosition(), new NoPiece(src.getPosition()));
 		board.get(dest).setPosition(dest);
 	}
 	private void move(@NotNull Piece piece, @NotNull Point dest) {
 		move(piece, CPoint.fromPoint(dest));
-	}
-	
-	private void invertToken() {
-		token = token == Color.BLACK ? Color.WHITE : Color.BLACK;
 	}
 	
 	/**
@@ -157,12 +188,9 @@ public class Engine implements Serializable {
 	 * @see NoPiece
 	 * @see CPoint
 	 */
-	public ArrayList<CPoint> computeAllPossibleMove(@NotNull CPoint position, @NotNull SpecialMove sm) throws NoPieceException {
+	public ArrayList<CPoint> computeAllPossibleMove(@NotNull CPoint position) throws NoPieceException {
 		if (position == null)
 			return null;
-		
-		if (sm == null)
-			sm = SpecialMove.NOTHING;
 		
 		Piece piece = getBoard().get(CPoint.toPoint(position));
 		
@@ -171,6 +199,8 @@ public class Engine implements Serializable {
 		
 		ArrayList<CPoint> list = piece.possibleMoves();
 		
+		// TODO: Delete the available tiles behind obstacles
+		
 		if (piece instanceof King)
 		{
 			deleteAlliesPositions(piece, list);
@@ -178,17 +208,19 @@ public class Engine implements Serializable {
 			// TODO: The king cannot go to a place where it can place its team in a CHECK state
 			// TODO: if `sm == SpecialMove.CASTLING`, add the castling tile
 		}
-		else if (piece instanceof Queen)
+		else if (piece instanceof Queen || piece instanceof Rook || piece instanceof Bishop)
 		{
-			// SO COMPLICATED
-		}
-		else if (piece instanceof Rook)
-		{
-			// SO COMPLICATED
-		}
-		else if (piece instanceof Bishop)
-		{
-			// SO COMPLICATED
+			// Get all the enemies on the board
+			ArrayList<Piece> foes = getBoard().getAll();
+			
+			// For each piece 'p'...
+			for (Piece p : foes) {
+				// ... Get all tiles behind the piece 'p', and remove them from the list
+				ArrayList<CPoint> notAvailable = computePlacesBehindFoe(piece, p);
+				list.removeAll(notAvailable);
+			}
+			
+			deleteAlliesPositions(piece, list);
 		}
 		else if (piece instanceof Knight)
 		{
@@ -203,14 +235,14 @@ public class Engine implements Serializable {
 			// Get the only available position:
 			Point pos = CPoint.toPoint(list.get(0));
 			
-			// If this position is occupied by an ally, the pawn cannot go there
-			if (getBoard().get(pos).getColor() == piece.getColor() && !(getBoard().get(pos) instanceof NoPiece)) {
+			// If this position is occupied by a piece, the pawn cannot go there
+			if (!(getBoard().get(pos) instanceof NoPiece)) {
 				list.remove(0);
 				canMoveForward = false;
 			}
 			
 			// Special move: First move
-			if (sm == SpecialMove.FIRST_MOVE && canMoveForward) {
+			if (canMoveForward && ((piece.getPosition().getY() == 7 && getToken() == Color.BLACK) || (piece.getPosition().getY() == 2 && getToken() == Color.WHITE))) {
 				list.add(CPoint.fromPoint(point.getX(), point.getY() + (piece.getColor() == Color.BLACK ? +2 : -2)));
 			}
 			
@@ -224,36 +256,8 @@ public class Engine implements Serializable {
 			}
 			
 			// Special move: En passant
-			Point check = new Point();
-			switch (piece.getColor())
-			{
-				case BLACK:
-					check = new Point(point.getX() - 1, point.getY() + 1);
-					if (getBoard().get(check).getColor() == Color.WHITE && !(getBoard().get(pos) instanceof NoPiece)) {
-						list.add(CPoint.fromPoint(check));
-						break;
-					}
-					
-					check = new Point(point.getX() + 1, point.getY() + 1);
-					if (getBoard().get(check).getColor() == Color.WHITE && !(getBoard().get(pos) instanceof NoPiece)) {
-						list.add(CPoint.fromPoint(check));
-						break;
-					}
-					break;
-				case WHITE:
-					check = new Point(point.getX() - 1, point.getY() - 1);
-					if (getBoard().get(check).getColor() == Color.BLACK && !(getBoard().get(pos) instanceof NoPiece)) {
-						list.add(CPoint.fromPoint(check));
-						break;
-					}
-					
-					check = new Point(point.getX() + 1, point.getY() - 1);
-					if (getBoard().get(check).getColor() == Color.BLACK && !(getBoard().get(pos) instanceof NoPiece)) {
-						list.add(CPoint.fromPoint(check));
-						break;
-					}
-					break;
-			}
+			checkEnPassant(list, piece, point.getX() - 1, point.getY() + (piece.getColor() == Color.BLACK ? +1 : -1));
+			checkEnPassant(list, piece, point.getX() + 1, point.getY() + (piece.getColor() == Color.BLACK ? +1 : -1));
 		}
 		
 		return list;
@@ -270,8 +274,103 @@ public class Engine implements Serializable {
 		}
 	}
 	
-	public ArrayList<CPoint> computeAllPossibleMove(@NotNull CPoint position) throws NoPieceException {
-		return computeAllPossibleMove(position, SpecialMove.NOTHING);
+	@SuppressWarnings("SpellCheckingInspection")
+	private boolean checkEnPassant(ArrayList<CPoint> list, Piece piece, Point check) {
+		if (((check.getX() < 0 || check.getX() >= getBoard().getNbColumns()) || (check.getY() < 0 || check.getY() >= getBoard().getNbRows()) || !(piece instanceof Pawn)))
+			return false;
+		
+		if (getBoard().get(check).getColor() == Color.invert(piece.getColor()) && !(getBoard().get(check) instanceof NoPiece)) {
+			list.add(CPoint.fromPoint(check));
+			return true;
+		}
+		
+		return false;
+	}
+	@SuppressWarnings("SpellCheckingInspection")
+	private boolean checkEnPassant(ArrayList<CPoint> list, Piece piece, int x, int y) {
+		return checkEnPassant(list, piece, new Point(x, y));
+	}
+	
+	/**
+	 * <p>
+	 *  Compute all tiles behind the piece {@code foe} in the view point of the piece {@code current}.
+	 * </p>
+	 * <p>
+	 *  Example:
+	 * </p>
+	 * <p>...........</p>
+	 * <p>...o.......</p>
+	 * <p>....x......</p>
+	 * <p>.....*.....</p>
+	 * <p>......*....</p>
+	 * <p></p>
+	 * <p> o : {@code current}</p>
+	 * <p> x : {@code foe}</p>
+	 * <p> * : places return by this method</p>
+	 * @param current The current view point
+	 * @param foe The foe piece
+	 * @return Return the list of all tiles behind {@code foe}
+	 * @throws NullPointerException Throw if {@code current} or {@code foe} is null
+	 * @throws NoPieceException Throw if {@code current} or {@code foe} is an instance of {@code NoPiece}
+	 * @see NoPiece
+	 */
+	public ArrayList<CPoint> computePlacesBehindFoe(@NotNull Piece current, @NotNull Piece foe) throws NullPointerException, NoPieceException {
+		if (current == null || foe == null)
+			throw new NullPointerException();
+		
+		if (current instanceof NoPiece)
+			throw new NoPieceException(current.getPosition());
+		
+		if (foe instanceof NoPiece)
+			throw new NoPieceException(foe.getPosition());
+		
+		ArrayList<CPoint> list = new ArrayList<>();
+		
+		if (current.getPosition().equals(foe.getPosition()))
+			return list;
+		
+		Point pcurrent = CPoint.toPoint(current.getPosition());
+		Point pfoe = CPoint.toPoint(foe.getPosition());
+		int x = pcurrent.getX(), y = pcurrent.getY();
+		int xf = pfoe.getX(), yf = pfoe.getY();
+		
+		// Top-left
+		if (x < xf && y < yf)
+			for (int i = xf + 1, j = yf + 1; i <= getBoard().getNbColumns() && j <= getBoard().getNbRows(); i++, j++)
+				list.add(CPoint.fromPoint(i, j));
+		// Top
+		else if (x == xf && y < yf)
+			for (int j = yf + 1; j < getBoard().getNbRows(); j++)
+				list.add(CPoint.fromPoint(xf, j));
+		// Top-right
+		else if (x > xf && y < yf)
+			for (int i = xf - 1, j = yf + 1; i >= 0 && j <= getBoard().getNbRows(); i--, j++)
+				list.add(CPoint.fromPoint(i, j));
+		// Right
+		else if (x > xf && y == yf)
+			for (int i = xf - 1; i >= 0; i--)
+				list.add(CPoint.fromPoint(i, yf));
+		// Bottom-right
+		else if (x > xf && y > yf)
+			for (int i = xf - 1, j = yf - 1; i >= 0 && j >= 0; i--, j--)
+				list.add(CPoint.fromPoint(i, j));
+		// Bottom
+		else if (x == xf && y > yf)
+			for (int j = yf - 1; j >= 0; j--)
+				list.add(CPoint.fromPoint(xf, j));
+		// Bottom-left
+		else if (x < xf && y > yf)
+			for (int i = xf + 1, j = yf - 1; i < getBoard().getNbColumns() && j >= 0; i++, j--)
+				list.add(CPoint.fromPoint(i, j));
+		// Left
+		else if (x < xf && y == yf)
+			for (int i = xf + 1; i < getBoard().getNbColumns(); i++)
+				list.add(CPoint.fromPoint(i, yf));
+		
+		// Remove the position of the foe
+		list.remove(foe.getPosition());
+		
+		return list;
 	}
 	
 	/* GETTERS & SETTERS */
@@ -280,23 +379,89 @@ public class Engine implements Serializable {
 		return board;
 	}
 	
-	public void setBoard(Chessboard board) {
-		this.board = board;
+	public void setBoard(@NotNull Chessboard board) {
+		if (board != null)
+			this.board = board;
 	}
 	
 	public GameState getState() {
 		return state;
 	}
 	
-	public void setState(GameState state) {
-		this.state = state;
+	public void setState(@NotNull GameState state) {
+		if (state != null) {
+			GameState oldState = this.state;
+			this.state = state;
+			engineListener.onGameStateChanged(oldState, this.state);
+		}
 	}
 	
 	public CheckState getCheck() {
 		return check;
 	}
 	
-	public void setCheck(CheckState check) {
-		this.check = check;
+	public void setCheck(@NotNull CheckState check) {
+		if (check != null)
+			this.check = check;
+	}
+	
+	public Color getToken() {
+		return token;
+	}
+	
+	public void setToken(@NotNull Color token) {
+		if (token != null) {
+			this.token = token;
+			engineListener.onTokenChanged(this.token);
+		}
+	}
+	
+	private void invertToken() {
+		setToken(getToken() == Color.BLACK ? Color.WHITE : Color.BLACK);
+	}
+	
+	public Player getpBlack() {
+		return pBlack;
+	}
+	
+	public void setpBlack(Player pBlack) {
+		this.pBlack = pBlack;
+	}
+	
+	public Player getpWhite() {
+		return pWhite;
+	}
+	
+	public void setpWhite(Player pWhite) {
+		this.pWhite = pWhite;
+	}
+	
+	public @Nullable Player getCurrentPlayer() {
+		switch (getToken())
+		{
+			case BLACK:
+				return this.pBlack;
+			case WHITE:
+				return this.pWhite;
+			default:
+				return null;
+		}
+	}
+	
+	public EngineListener getEngineListener() {
+		return engineListener;
+	}
+	
+	public void setEngineListener(@NotNull EngineListener engineListener) {
+		this.engineListener = engineListener != null ? engineListener : new EngineListener() {
+			@Override
+			public void onPieceMoved(CPoint source, Piece piece) { }
+			@Override
+			public void onTokenChanged(Color token) { }
+			@Override
+			public void onGameStateChanged(GameState oldState, GameState newState) { }
+			@Override
+			public void onPieceKilled(Piece pieceKilled) { }
+		};
 	}
 }

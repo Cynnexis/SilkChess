@@ -173,7 +173,7 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 	public void refreshLabel() {
 		l_piece.setFont(new Font(l_piece.getFont().getName(), Font.BOLD, 30));
 		
-		if (getPiece() instanceof King)
+		/*if (getPiece() instanceof King)
 			l_piece.setText(Character.toString((char) 9818));
 		else if (getPiece() instanceof Queen)
 			l_piece.setText(Character.toString((char) 9819));
@@ -186,7 +186,9 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 		else if (getPiece() instanceof Pawn)
 			l_piece.setText(Character.toString((char) 9823));
 		else
-			l_piece.setText("");
+			l_piece.setText("");*/
+		
+		l_piece.setText(Character.toString(PieceRepresentation.getRepresentation(getPiece())));
 		
 		switch (getPiece().getColor())
 		{
