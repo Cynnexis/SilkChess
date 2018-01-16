@@ -21,6 +21,8 @@ import java.util.ArrayList;
 
 public class JChessboard extends JPanel implements Serializable {
 	
+	// TODO: Create forceSquaredTiles
+	
 	private Matrix<Tile> board;
 	
 	private JPanel p_board = new JPanel();

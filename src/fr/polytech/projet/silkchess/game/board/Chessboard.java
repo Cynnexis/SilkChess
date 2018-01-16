@@ -1,10 +1,13 @@
 package fr.polytech.projet.silkchess.game.board;
 
 import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
 import fr.berger.enhancedlist.Matrix;
 import fr.berger.enhancedlist.Point;
+import fr.polytech.projet.silkchess.debug.Debug;
 import fr.polytech.projet.silkchess.game.CPoint;
 import fr.polytech.projet.silkchess.game.Color;
+import fr.polytech.projet.silkchess.game.Player;
 import fr.polytech.projet.silkchess.game.pieces.*;
 
 import java.util.ArrayList;
@@ -38,6 +41,15 @@ public class Chessboard extends Matrix<Piece> {
 		
 		reset();
 	}
+	public Chessboard(Chessboard copy) {
+		super(copy.getNbColumns(), copy.getNbRows(), new NoPiece());
+		
+		reset();
+		
+		for (int i = 0; i < getNbColumns(); i++)
+			for (int j = 0; j < getNbRows(); j++)
+				this.set(i, j, copy.get(i, j));
+	}
 	
 	public void reset() {
 		this.clear(new NoPiece());
@@ -49,7 +61,7 @@ public class Chessboard extends Matrix<Piece> {
 		this.set('A', 8, new Rook());
 	}
 	
-	public boolean move(CPoint source, CPoint dest) {
+	/*public boolean move(CPoint source, CPoint dest) {
 		Piece piece = this.get(source);
 		// Check if move is possible
 		if (piece.canMove(dest))
@@ -69,7 +81,7 @@ public class Chessboard extends Matrix<Piece> {
 	}
 	public boolean move(int sourceX, int sourceY, int destX, int destY) {
 		return move(new Point(sourceX, sourceY), new Point(destX, destY));
-	}
+	}*/
 	
 	public Piece get(CPoint cpoint) {
 		return this.get(cpoint.getX() - 'A', getNbRows() - cpoint.getY());
@@ -83,6 +95,20 @@ public class Chessboard extends Matrix<Piece> {
 	}
 	public boolean set(char x, int y, Piece value) {
 		return this.set(new CPoint(x, y), value);
+	}
+	
+	public @Nullable Piece move(@NotNull Piece src, @NotNull CPoint dest) {
+		Piece pieceKilled = null;
+		if (!(get(dest) instanceof NoPiece))
+			pieceKilled = get(dest);
+		
+		set(dest, src);
+		set(src.getPosition(), new NoPiece(src.getPosition()));
+		get(dest).setPosition(dest);
+		return pieceKilled;
+	}
+	public @Nullable Piece move(@NotNull Piece piece, @NotNull Point dest) {
+		return move(piece, CPoint.fromPoint(dest));
 	}
 	
 	public <T extends Piece> ArrayList<CPoint> search(T piece, Color color) {

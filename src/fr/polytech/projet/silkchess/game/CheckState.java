@@ -23,22 +23,18 @@ public enum CheckState implements Serializable {
 	W_CHECK,
 	
 	/**
-	 * Black lose
+	 * Black loses
 	 */
 	B_CHECKMATE,
 	
 	/**
-	 * White lose
+	 * White loses
 	 */
 	W_CHECKMATE,
 	
 	/**
-	 * Black's King cannot move any longer, but it is not in the range of a White's piece
+	 * If a player has no piece but a king, and this king is not in check BUT it cannot moved without being in check,
+	 * then it's a stalemate (a draw). There is no winner, no loser.
 	 */
-	B_DRAW,
-	
-	/**
-	 * White's King cannot move any longer, but it is not in the range of a Black's piece
-	 */
-	W_DRAW
+	STALEMATE
 }

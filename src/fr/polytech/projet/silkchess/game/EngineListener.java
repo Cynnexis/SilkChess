@@ -10,5 +10,7 @@ public interface EngineListener {
 	
 	void onGameStateChanged(GameState oldState, GameState newState);
 	
+	void onCheckStateChanged(CheckState state);
+	
 	void onPieceKilled(Piece pieceKilled);
 }

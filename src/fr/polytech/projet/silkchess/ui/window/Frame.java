@@ -62,6 +62,30 @@ public class Frame extends JFrame {
 			}
 			
 			@Override
+			public void onCheckStateChanged(CheckState check) {
+				switch (check)
+				{
+					case NO_CHECKSTATE:
+						break;
+					case B_CHECK:
+						JOptionPane.showMessageDialog(Frame.this, "Check", "Black is in check", JOptionPane.INFORMATION_MESSAGE);
+						break;
+					case W_CHECK:
+						JOptionPane.showMessageDialog(Frame.this, "Check", "White is in check", JOptionPane.INFORMATION_MESSAGE);
+						break;
+					case B_CHECKMATE:
+						JOptionPane.showMessageDialog(Frame.this, "Checkmate", "Black is checkmate!", JOptionPane.INFORMATION_MESSAGE);
+						break;
+					case W_CHECKMATE:
+						JOptionPane.showMessageDialog(Frame.this, "Checkmate", "Black is checkmate!", JOptionPane.INFORMATION_MESSAGE);
+						break;
+					case STALEMATE:
+						JOptionPane.showMessageDialog(Frame.this, "Stalemate", "Stalemate!", JOptionPane.INFORMATION_MESSAGE);
+						break;
+				}
+			}
+			
+			@Override
 			public void onPieceKilled(Piece pieceKilled) {
 			
 			}
@@ -116,7 +140,7 @@ public class Frame extends JFrame {
 						Piece piece = tile.getPiece();
 						if (piece.getColor() == engine.getToken()) {
 							try {
-								ArrayList<CPoint> list = engine.computeAllPossibleMove(piece.getPosition());
+								ArrayList<CPoint> list = MoveManager.computeAllPossibleMoveWithCheck(engine.getBoard(), engine.getToken(), piece.getPosition());
 								for (CPoint c : list)
 									chessboard.hightlightTile(CPoint.toPoint(c));
 								

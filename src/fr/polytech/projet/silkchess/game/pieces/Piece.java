@@ -21,22 +21,28 @@ public abstract class Piece implements Serializable, Movable, Transferable {
 	private Color color = Color.BLACK;
 	@NotNull
 	private CPoint position = new CPoint();
+	@NotNull
+	private boolean hasMoved = false;
 	
 	public Piece(Color color, CPoint position) {
 		setColor(color);
 		setPosition(position);
+		setHasMoved(false);
 	}
 	public Piece(Color color) {
 		setColor(color);
 		setPosition(new CPoint());
+		setHasMoved(false);
 	}
 	public Piece(CPoint position) {
 		setColor(Color.BLACK);
 		setPosition(position);
+		setHasMoved(false);
 	}
 	public Piece() {
 		setColor(Color.BLACK);
 		setPosition(new CPoint());
+		setHasMoved(false);
 	}
 	
 	public boolean canMove(CPoint destination) {
@@ -46,20 +52,35 @@ public abstract class Piece implements Serializable, Movable, Transferable {
 	
 	/* GETTERS & SETTERS */
 	
-	public Color getColor() {
+	public @NotNull Color getColor() {
 		return color;
 	}
 	
-	public void setColor(Color color) {
-		this.color = color;
+	public void setColor(@NotNull Color color) {
+		if (color != null)
+			this.color = color;
 	}
 	
-	public CPoint getPosition() {
+	public @NotNull CPoint getPosition() {
 		return position;
 	}
 	
-	public void setPosition(CPoint position) {
-		this.position = position;
+	public void setPosition(@NotNull CPoint position) {
+		if (position != null) {
+			CPoint oldPos = this.position;
+			this.position = position;
+			
+			if (!oldPos.equals(position))
+				setHasMoved(true);
+		}
+	}
+	
+	public boolean hasMoved() {
+		return hasMoved;
+	}
+	
+	public void setHasMoved(boolean hasMoved) {
+		this.hasMoved = hasMoved;
 	}
 	
 	/* OVERRIDES */

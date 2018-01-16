@@ -3,6 +3,7 @@ package fr.polytech.projet.silkchess.ui.window.components;
 import com.sun.istack.internal.NotNull;
 import fr.polytech.projet.silkchess.debug.Debug;
 import fr.polytech.projet.silkchess.game.CPoint;
+import fr.polytech.projet.silkchess.game.Check;
 import fr.polytech.projet.silkchess.game.Color;
 import fr.polytech.projet.silkchess.game.pieces.*;
 import fr.polytech.projet.silkchess.ui.preferences.EPref;
@@ -74,15 +75,18 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (!Pref.getBoolean(EPref.CHESSBOARD_CONTROL)) {
-			tileListener.onTileDropBegin(this);
 			
 			if (e == null)
-				e = new MouseEvent(this, MouseEvent.MOUSE_CLICKED, 0, InputEvent.BUTTON1_DOWN_MASK, 0, 0, 1, false);
+				e = new MouseEvent(this, MouseEvent.BUTTON1, 0, InputEvent.BUTTON1_DOWN_MASK, 0, 0, 1, false);
 			
-			if (actionListeners != null && actionListeners.size() > 0)
-				for (ActionListener al : actionListeners)
-					if (al != null)
-						al.actionPerformed(new ActionEvent(e.getSource(), e.getID(), e.paramString()));
+			if (e.getButton() == MouseEvent.BUTTON1) {
+				tileListener.onTileDropBegin(this);
+				
+				if (actionListeners != null && actionListeners.size() > 0)
+					for (ActionListener al : actionListeners)
+						if (al != null)
+							al.actionPerformed(new ActionEvent(e.getSource(), e.getID(), e.paramString()));
+			}
 		}
 	}
 	
