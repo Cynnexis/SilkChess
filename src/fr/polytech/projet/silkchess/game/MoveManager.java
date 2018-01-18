@@ -6,6 +6,8 @@ import fr.polytech.projet.silkchess.game.board.Chessboard;
 import fr.polytech.projet.silkchess.game.exceptions.NoPieceException;
 import fr.polytech.projet.silkchess.game.pieces.*;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 public class MoveManager {
@@ -68,6 +70,9 @@ public class MoveManager {
 			
 			// Get the only available position:
 			Point pos = CPoint.toPoint(list.get(0));
+			// TODO: Delete
+			//CPoint cpos = piece.getPosition();
+			//Point pos = new Point(CPoint.toPoint(cpos).getX(), CPoint.toPoint(cpos).getY() + (piece.getColor() == Color.BLACK ? +1 : -1));
 			
 			// If this position is occupied by a piece, the pawn cannot go there
 			if (!(board.get(pos) instanceof NoPiece)) {
@@ -114,22 +119,15 @@ public class MoveManager {
 		
 		// If the piece is a king, ...
 		if (piece instanceof King) {
-			// ... delete all moves that put the king under check
-			for (int i = 0; i < list.size(); i++) {
-				if (Check.checkIfTileIsChecked(board, piece.getColor(), list.get(i))) {
-					list.remove(i);
-					i--;
-				}
-			}
-			
-			// and delete all tiles which can put the king under check for the next round
+			// ...delete all tiles which can put the king under check for the next round
 			for (int i = 0; i < list.size(); i++) {
 				// The program creates a NEW piece and chessboard to "simulate" the move.
 				// The keyword "new" is very important, because in java "a = b" means that if 'a' is changed, so is 'b'.
-				// Java passes the pointer reference through the equality operation. The "new" keyword prevent the code
-				/// from this effect by creating a new instance (a new memory area) of the class.
+				// Java passes the pointer reference through the equality operation. The "new" keyword prevent this
+				// effect by creating a new instance (a new memory area) of the class.
 				King copyKing = new King(piece.getColor(), piece.getPosition());
 				Chessboard c = new Chessboard(board);
+				
 				c.move(copyKing, list.get(i));
 				if (Check.checkIfPieceIsChecked(c, copyKing)) {
 					list.remove(i);
@@ -140,7 +138,37 @@ public class MoveManager {
 		// If it is a normal piece, check that the move of this piece won't put its king under check
 		else
 		{
-			// TODO: Implement that
+			try {
+				// Search the ally king :
+				King king = null;
+				for (int i = 0, maxi = board.getNbColumns(); i < maxi && king == null; i++) {
+					for (int j = 0, maxj = board.getNbRows(); j < maxj && king == null; j++) {
+						if (board.get(i, j) != null && board.get(i, j) instanceof King && board.get(i, j).getColor() == piece.getColor())
+							king = (King) board.get(i, j);
+					}
+				}
+				
+				if (king == null)
+					throw new NullPointerException();
+				
+				for (int i = 0; i < list.size(); i++) {
+					// To create a new instance of the piece (like the method did for the king case), the program must
+					// use Java Reflection and create a new instance through `Class<?>.newInstance()` method
+					Piece newInstance = piece.getClass().newInstance();
+					newInstance.setColor(piece.getColor());
+					newInstance.setPosition(piece.getPosition());
+					// Create a copy of the chessboard
+					Chessboard c = new Chessboard(board);
+					
+					c.move(newInstance, list.get(i));
+					if (Check.checkIfPieceIsChecked(c, king)) {
+						list.remove(i);
+						i--;
+					}
+				}
+			} catch (InstantiationException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		return list;

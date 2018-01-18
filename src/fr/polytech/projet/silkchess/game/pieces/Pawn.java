@@ -23,6 +23,7 @@ public class Pawn extends Piece {
 	
 	@Override
 	public ArrayList<CPoint> possibleMoves() {
+		
 		ArrayList<CPoint> list = new ArrayList<>();
 		Point src = CPoint.toPoint(getPosition());
 		
@@ -35,4 +36,6 @@ public class Pawn extends Piece {
 		// Changing all Point to CPoint
 		return PointsToCPoints(points);
 	}
+	
+	
 }

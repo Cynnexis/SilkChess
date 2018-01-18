@@ -120,7 +120,7 @@ public class Engine implements Serializable {
 		play(CPoint.toPoint(src), CPoint.toPoint(dest));
 	}
 	
-	public boolean canMove(@NotNull CPoint point, @NotNull CPoint dest) throws NotImplementedException {
+	public boolean canMove(@NotNull CPoint point, @NotNull CPoint dest) {
 		try {
 			return MoveManager.computeAllPossibleMoveWithCheck(getBoard(), getToken(), point).contains(dest);
 		} catch (NoPieceException e) {

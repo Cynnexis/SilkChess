@@ -18,7 +18,10 @@ public class SpecialMove {
 	EN_PASSANT // A Pawn kills enemies in diagonal
 	*/
 	
-	public boolean checkIfCastlingIsPossible(@NotNull Chessboard board, @NotNull King king, @NotNull Rook rook) {
+	public boolean checkIfCastlingIsPossible(@NotNull Chessboard board, @NotNull King king, @NotNull Rook rook) throws NullPointerException {
+		if (board == null || king == null || rook == null)
+			throw new NullPointerException();
+		
 		// Check if the color of the rook is the same as the king's
 		if (!king.getColor().equals(rook.getColor()))
 			return false;
@@ -61,7 +64,10 @@ public class SpecialMove {
 		return true;
 	}
 	
-	public boolean checkIfFirstMoveIsPossible(Chessboard board, Pawn pawn) {
+	public boolean checkIfFirstMoveIsPossible(@NotNull Pawn pawn) throws NullPointerException {
+		if (pawn == null)
+			throw new NullPointerException();
+		
 		return !pawn.hasMoved();
 	}
 	
@@ -72,7 +78,10 @@ public class SpecialMove {
 	 * @return Return the index of the pawn which can be promoted. If {@code -1} is returned, then no pawn must be
 	 * promoted.
 	 */
-	public int checkIfPromotionIsPossible(Chessboard board, Color player) {
+	public int checkIfPromotionIsPossible(@NotNull Chessboard board, @NotNull Color player) throws NullPointerException {
+		if (board == null || player == null)
+			throw new NullPointerException();
+		
 		int y;
 		if (player.equals(Color.WHITE))
 			y = 0;

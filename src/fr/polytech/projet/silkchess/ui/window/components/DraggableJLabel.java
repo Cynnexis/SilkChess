@@ -5,6 +5,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+@Deprecated
 public class DraggableJLabel extends JLabel {
 	
 	public DraggableJLabel() {

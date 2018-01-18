@@ -14,12 +14,15 @@ import java.util.function.Function;
 
 public class Check {
 	
-	public static boolean checkIfTileIsChecked(@NotNull Chessboard board, @NotNull Color color, @NotNull CPoint position) {
+	public static boolean checkIfTileIsChecked(@NotNull Chessboard board, @NotNull Color color, @NotNull CPoint position) throws NullPointerException {
+		if (board == null || color == null || position == null)
+			throw new NullPointerException();
+		
 		// Get all the enemies from the board (except NoPiece pieces)
 		ArrayList<Piece> foes = new ArrayList<>();
 		for (int i = 0; i < board.getNbColumns(); i++)
 			for (int j = 0; j < board.getNbRows(); j++)
-				if (board.get(i, j) != null && !(board.get(i, j) instanceof NoPiece) && !board.get(i, j).getColor().equals(color))
+				if (board.get(i, j) != null && !(board.get(i, j) instanceof NoPiece) && board.get(i, j).getColor() != color)
 					foes.add(board.get(i, j));
 		
 		for (Piece p : foes) {
@@ -41,7 +44,10 @@ public class Check {
 		return checkIfTileIsChecked(board, piece.getColor(), piece.getPosition());
 	}
 	
-	public static @NotNull CheckState checkCheck(Chessboard board) {
+	public static @NotNull CheckState checkCheck(@NotNull Chessboard board) throws NullPointerException {
+		if (board == null)
+			throw new NullPointerException();
+		
 		CheckState state = CheckState.NO_CHECKSTATE;
 		
 		// Get all the kings from the board
@@ -55,6 +61,7 @@ public class Check {
 			if (checkIfPieceIsChecked(board, kings.get(i)))
 				state = kings.get(i).getColor() == Color.BLACK ? CheckState.B_CHECK : CheckState.W_CHECK;
 		
+		// TODO: Fix this bug
 		// If a check is detected, check checkmate
 		/*if (state == CheckState.B_CHECK || state == CheckState.W_CHECK)
 		{
@@ -104,7 +111,7 @@ public class Check {
 		return state;
 	}
 	
-	private static boolean areAllTilesAroundKingChecked(Chessboard board, King king) throws NoPieceException {
+	private static boolean areAllTilesAroundKingChecked(@NotNull Chessboard board, @NotNull King king) throws NoPieceException {
 		ArrayList<CPoint> list = MoveManager.computeAllPossibleMoveWithoutCheck(board, king);
 		
 		boolean tileNotCheckedDetected = false;
