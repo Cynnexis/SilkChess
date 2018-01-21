@@ -95,9 +95,6 @@ public class Engine implements Serializable {
 		if (srcpiece.getColor() != token)
 			throw new PieceDoesNotBelongToPlayerException(srcpiece, token);
 		
-		/*if (!(destpiece instanceof NoPiece))
-			throw new TileFullException(destpiece.getPosition());*/
-		
 		if (!canMove(CPoint.fromPoint(xsrc, ysrc), CPoint.fromPoint(xdest, ydest)))
 			throw new PieceCannotMove(srcpiece, new Point(xdest, ydest));
 		
@@ -130,16 +127,25 @@ public class Engine implements Serializable {
 	}
 	
 	private void move(@NotNull Piece src, @NotNull CPoint dest) {
-		/*if (!(board.get(dest) instanceof NoPiece))
-		{
-			Debug.println(board.get(dest).toString() + " added to graveyard");
-			getCurrentPlayer().kill(board.get(dest));
-		}
+		if (src == null || dest == null)
+			throw new NullPointerException();
 		
-		board.set(dest, src);
-		board.set(src.getPosition(), new NoPiece(src.getPosition()));
-		board.get(dest).setPosition(dest);*/
 		Piece p = getBoard().move(src, dest);
+		
+		// Castling move
+		if (SpecialMove.IS_CASTLING != null && SpecialMove.IS_CASTLING.getX() != null && SpecialMove.IS_CASTLING.getY() != null &&
+				(src instanceof King) && src.getPosition().equals(SpecialMove.IS_CASTLING.getX().getPosition())) {
+			Rook r = SpecialMove.IS_CASTLING.getY();
+			SpecialMove.IS_CASTLING = null;
+			if (r.getColor() == Color.BLACK && r.getPosition().equals(new CPoint('A', 8)))
+				getBoard().move(r, new CPoint('D', 8));
+			else if (r.getColor() == Color.BLACK && r.getPosition().equals(new CPoint('H', 8)))
+				getBoard().move(r, new CPoint('F', 8));
+			else if (r.getColor() == Color.WHITE && r.getPosition().equals(new CPoint('A', 1)))
+				getBoard().move(r, new CPoint('D', 1));
+			else if (r.getColor() == Color.WHITE && r.getPosition().equals(new CPoint('H', 1)))
+				getBoard().move(r, new CPoint('F', 1));
+		}
 		
 		if (p != null)
 			getCurrentPlayer().kill(p);

@@ -17,4 +17,6 @@ public class SilkChess {
  * TODO:
  * Add a settings dialog, containing:
  * - Choose between Drag'n Drop or clicking
+ *
+ * Make the Saver
  */

@@ -43,6 +43,24 @@ public class MoveManager {
 			
 			// TODO: The king cannot go to a place where it can place its team in a CHECK state
 			// TODO: if `sm == SpecialMove.CASTLING`, add the castling tile
+			// Search all the friendly rooks
+			ArrayList<Piece> pieces = board.getAll(piece.getColor());
+			
+			for (Piece p : pieces) {
+				if (p instanceof Rook) {
+					if (SpecialMove.checkIfCastlingIsPossible(board, (King) piece, (Rook) p, false)) {
+						if (p.getColor() == Color.BLACK && p.getPosition().equals(new CPoint('A', 8)))
+							list.add(new CPoint('C', 8));
+						else if (p.getColor() == Color.BLACK && p.getPosition().equals(new CPoint('H', 8)))
+							list.add(new CPoint('G', 8));
+						else if (p.getColor() == Color.WHITE && p.getPosition().equals(new CPoint('A', 1)))
+							list.add(new CPoint('C', 1));
+						else if (p.getColor() == Color.WHITE && p.getPosition().equals(new CPoint('H', 1)))
+							list.add(new CPoint('G', 1));
+					}
+				}
+			}
+			
 		}
 		else if (piece instanceof Queen || piece instanceof Rook || piece instanceof Bishop)
 		{

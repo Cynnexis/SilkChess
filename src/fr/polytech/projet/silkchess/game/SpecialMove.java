@@ -1,6 +1,8 @@
 package fr.polytech.projet.silkchess.game;
 
 import com.sun.istack.internal.NotNull;
+import fr.berger.enhancedlist.Couple;
+import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.game.board.Chessboard;
 import fr.polytech.projet.silkchess.game.pieces.King;
 import fr.polytech.projet.silkchess.game.pieces.NoPiece;
@@ -18,7 +20,9 @@ public class SpecialMove {
 	EN_PASSANT // A Pawn kills enemies in diagonal
 	*/
 	
-	public boolean checkIfCastlingIsPossible(@NotNull Chessboard board, @NotNull King king, @NotNull Rook rook) throws NullPointerException {
+	public static Couple<King, Rook> IS_CASTLING = null;
+	
+	public static boolean checkIfCastlingIsPossible(@NotNull Chessboard board, @NotNull King king, @NotNull Rook rook, boolean checkCheck) throws NullPointerException {
 		if (board == null || king == null || rook == null)
 			throw new NullPointerException();
 		
@@ -35,36 +39,46 @@ public class SpecialMove {
 			return false;
 		
 		// TODO: Check if the king is in check AND all the cases between the rook and the king are not check too
-		
-		// Check if there is a piece between them
-		boolean rookOnLeft;
-		int i = rook.getPosition().getX();
-		
-		if (rook.getPosition().getX() == king.getPosition().getX())
+		if (checkCheck && Check.checkIfPieceIsChecked(board, king))
 			return false;
 		
-		rookOnLeft = rook.getPosition().getX() < king.getPosition().getX();
-		if (rookOnLeft)
-			i += 1;
-		else
-			i -= 1;
+		// Check if there is a piece between them & if the tiles are checked
+		boolean rookOnLeft;
+		int i = CPoint.toPoint(rook.getPosition()).getX();
 		
-		while (i != king.getPosition().getX())
+		if (i == CPoint.toPoint(king.getPosition()).getX())
+			return false;
+		
+		rookOnLeft = i < CPoint.toPoint(king.getPosition()).getX();
+		if (rookOnLeft)
+			i++;
+		else
+			i--;
+		
+		while (i != CPoint.toPoint(king.getPosition()).getX())
 		{
+			// If a tile is checked by an enemy, return false
+			if (checkCheck && Check.checkIfTileIsChecked(board, king.getColor(), new Point(i, CPoint.toPoint(rook.getPosition()).getY())))
+				return false;
+			
 			// If a piece is found between the two pieces, return false
-			if (!(board.get(i, rook.getPosition().getY()) instanceof NoPiece))
+			if (!(board.get(i, CPoint.toPoint(rook.getPosition()).getY()) instanceof NoPiece))
 				return false;
 			
 			if (rookOnLeft)
-				i += 1;
+				i++;
 			else
-				i -= 1;
+				i--;
 		}
 		
+		IS_CASTLING = new Couple<>(king, rook);
 		return true;
 	}
+	public static boolean checkIfCastlingIsPossible(@NotNull Chessboard board, @NotNull King king, @NotNull Rook rook) throws NullPointerException {
+		return checkIfCastlingIsPossible(board, king, rook, true);
+	}
 	
-	public boolean checkIfFirstMoveIsPossible(@NotNull Pawn pawn) throws NullPointerException {
+	public static boolean checkIfFirstMoveIsPossible(@NotNull Pawn pawn) throws NullPointerException {
 		if (pawn == null)
 			throw new NullPointerException();
 		
@@ -78,7 +92,7 @@ public class SpecialMove {
 	 * @return Return the index of the pawn which can be promoted. If {@code -1} is returned, then no pawn must be
 	 * promoted.
 	 */
-	public int checkIfPromotionIsPossible(@NotNull Chessboard board, @NotNull Color player) throws NullPointerException {
+	public static int checkIfPromotionIsPossible(@NotNull Chessboard board, @NotNull Color player) throws NullPointerException {
 		if (board == null || player == null)
 			throw new NullPointerException();
 		
@@ -100,7 +114,7 @@ public class SpecialMove {
 		return -1;
 	}
 	
-	public boolean checkIfEnPassantIsPossible(Chessboard board, Pawn pawn) {
+	public static boolean checkIfEnPassantIsPossible(Chessboard board, Pawn pawn) {
 		// TODO: Tu sais ce que t'as à faire.
 		return false;
 	}

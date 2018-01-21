@@ -79,7 +79,7 @@ public abstract class Piece implements Serializable, Movable, Transferable {
 		return hasMoved;
 	}
 	
-	public void setHasMoved(boolean hasMoved) {
+	private void setHasMoved(boolean hasMoved) {
 		this.hasMoved = hasMoved;
 	}
 	

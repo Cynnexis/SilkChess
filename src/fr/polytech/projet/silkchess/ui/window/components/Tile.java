@@ -30,6 +30,7 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 	private Color color = Color.BLACK;
 	@NotNull
 	private Piece piece = new NoPiece();
+	private boolean isHighlight = false;
 	@NotNull
 	private ArrayList<ActionListener> actionListeners = new ArrayList<>();
 	
@@ -60,6 +61,7 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 	private void init(@NotNull Color color, Piece piece) {
 		setColor(color);
 		setPiece(piece);
+		setHighlight(false);
 		this.addMouseListener(this);
 		this.add(l_piece);
 		
@@ -71,7 +73,35 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 		setColor(getColor());
 	}
 	
+	/* JPanel Override */
+	
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		
+		switch (getColor())
+		{
+			case BLACK:
+				this.setBackground(new java.awt.Color(214, 137, 75));
+				break;
+			case WHITE:
+				this.setBackground(new java.awt.Color(255, 205, 158));
+				break;
+		}
+		
+		if (isHighlight()) {
+			int minDimension = this.getWidth() < this.getHeight() ? this.getWidth() : this.getHeight();
+			
+			// Margin:
+			minDimension = (int) ((float) minDimension - ((float) minDimension * .4f));
+			
+			g.setColor(new java.awt.Color(83, 164, 130, 128));
+			g.fillOval((this.getWidth() - minDimension) / 2, (this.getHeight() - minDimension) / 2, minDimension, minDimension);
+		}
+	}
+	
 	/* MouseListener Events */
+	
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (!Pref.getBoolean(EPref.CHESSBOARD_CONTROL)) {
@@ -121,15 +151,7 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 	
 	public void setColor(@NotNull Color color) {
 		this.color = color;
-		switch (this.color)
-		{
-			case BLACK:
-				this.setBackground(new java.awt.Color(214, 137, 75));
-				break;
-			case WHITE:
-				this.setBackground(new java.awt.Color(255, 205, 158));
-				break;
-		}
+		repaint();
 		tileListener.onColorChanged(this.color);
 	}
 	
@@ -140,7 +162,17 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 	public void setPiece(@NotNull Piece piece) {
 		this.piece = piece;
 		refreshLabel();
+		repaint();
 		tileListener.onPieceChanged(this.piece);
+	}
+	
+	public boolean isHighlight() {
+		return isHighlight;
+	}
+	
+	public void setHighlight(boolean highlight) {
+		isHighlight = highlight;
+		repaint();
 	}
 	
 	public ArrayList<ActionListener> getActionListeners() {

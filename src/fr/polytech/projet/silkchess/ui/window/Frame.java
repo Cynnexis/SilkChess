@@ -5,10 +5,12 @@ import fr.berger.enhancedlist.MatrixListener;
 import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.game.*;
 import fr.polytech.projet.silkchess.game.Color;
+import fr.polytech.projet.silkchess.game.board.Chessboard;
 import fr.polytech.projet.silkchess.game.exceptions.NoPieceException;
 import fr.polytech.projet.silkchess.game.exceptions.PieceCannotMove;
 import fr.polytech.projet.silkchess.game.exceptions.PieceDoesNotBelongToPlayerException;
 import fr.polytech.projet.silkchess.game.exceptions.TileFullException;
+import fr.polytech.projet.silkchess.game.io.Saver;
 import fr.polytech.projet.silkchess.game.pieces.Piece;
 import fr.polytech.projet.silkchess.ui.window.components.JChessboard;
 import fr.polytech.projet.silkchess.ui.window.components.JChessboardListener;
@@ -16,7 +18,12 @@ import fr.polytech.projet.silkchess.ui.window.components.PlayerBoardPanel;
 import fr.polytech.projet.silkchess.ui.window.components.Tile;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Frame extends JFrame {
@@ -25,6 +32,12 @@ public class Frame extends JFrame {
 	private static Frame frame = new Frame();
 	
 	private Engine engine = new Engine();
+	
+	private JMenuBar menuBar = new JMenuBar();
+	private JMenu m_file = new JMenu("File");
+	private JMenuItem mi_save = new JMenuItem("Save");
+	private JMenuItem mi_open = new JMenuItem("Open");
+	private JMenuItem mi_quit = new JMenuItem("Exit");
 	
 	private PlayerBoardPanel pbp_black = new PlayerBoardPanel(Color.BLACK);
 	private JChessboard chessboard = new JChessboard(engine.getBoard().getNbColumns(), engine.getBoard().getNbRows());
@@ -179,6 +192,46 @@ public class Frame extends JFrame {
 			}
 		});
 		
+		mi_save.addActionListener((ActionEvent e) -> {
+			if (engine != null)
+				Saver.save(engine.getBoard());
+		});
+		
+		mi_open.addActionListener((ActionEvent e) -> {
+			if (engine != null) {
+				JFileChooser jfc = new JFileChooser("./");
+				jfc.setDialogTitle("Open a chessboard...");
+				jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				jfc.setMultiSelectionEnabled(false);
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("Text file | (*.txt)", "txt");
+				jfc.addChoosableFileFilter(filter);
+				int returnValue = jfc.showOpenDialog(Frame.this);
+				
+				if (returnValue == JFileChooser.APPROVE_OPTION) {
+					Chessboard board = Saver.load(jfc.getSelectedFile());
+					
+					if (board == null) {
+						JOptionPane.showMessageDialog(Frame.this, "The file not found", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+					else {
+						for (int i = 0; i < engine.getBoard().getNbColumns(); i++)
+							for (int j = 0; j < engine.getBoard().getNbRows(); j++)
+								engine.getBoard().set(i, j, board.get(i, j));
+					}
+				}
+			}
+		});
+		
+		mi_quit.addActionListener((ActionEvent e) -> {
+			Frame.this.dispose();
+		});
+		
+		m_file.add(mi_save);
+		m_file.add(mi_open);
+		m_file.add(mi_quit);
+		
+		menuBar.add(m_file);
+		
 		engine.newGame();
 	}
 	
@@ -191,6 +244,7 @@ public class Frame extends JFrame {
 		this.setResizable(true);
 		this.setLocationRelativeTo(null);
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		this.setJMenuBar(menuBar);
 		
 		this.getContentPane().add(pbp_black, BorderLayout.NORTH);
 		this.getContentPane().add(chessboard, BorderLayout.CENTER);

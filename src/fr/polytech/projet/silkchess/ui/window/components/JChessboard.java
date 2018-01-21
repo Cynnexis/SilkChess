@@ -175,13 +175,15 @@ public class JChessboard extends JPanel implements Serializable {
 	}
 	
 	public void hightlightTile(Point point) {
-		getBoard().get(point).setBackground(java.awt.Color.BLUE);
+		//getBoard().get(point).setBackground(java.awt.Color.BLUE);
+		getBoard().get(point).setHighlight(true);
 	}
 	
 	public void resetHightlight() {
 		for (int i = 0; i < getBoard().getNbColumns(); i++) {
 			for (int j = 0; j < getBoard().getNbRows(); j++) {
-				getBoard().get(i, j).resetColor();
+				//getBoard().get(i, j).resetColor();
+				getBoard().get(i, j).setHighlight(false);
 			}
 		}
 	}
