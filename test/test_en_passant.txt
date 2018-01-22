@@ -1,0 +1,2 @@
+black p1 b4 p2 c4 p3 d7 p4 g7 p5 a8 p6 b8 k e8
+white p1 a2 p2 d2 p3 e5 p4 f5 p5 a1 p6 b1 k e1

@@ -2,6 +2,7 @@ package fr.polytech.projet.silkchess.game;
 
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
+import fr.berger.enhancedlist.Couple;
 import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.debug.Debug;
 import fr.polytech.projet.silkchess.game.board.Chessboard;
@@ -130,6 +131,8 @@ public class Engine implements Serializable {
 		if (src == null || dest == null)
 			throw new NullPointerException();
 		
+		CPoint pieceSource = src.getPosition();
+		
 		Piece p = getBoard().move(src, dest);
 		
 		// Castling move
@@ -147,8 +150,19 @@ public class Engine implements Serializable {
 				getBoard().move(r, new CPoint('F', 1));
 		}
 		
+		// En passant move
+		if (SpecialMove.IS_MOVING_EN_PASSANT != null && SpecialMove.IS_MOVING_EN_PASSANT.getX() != null && SpecialMove.IS_MOVING_EN_PASSANT.getY() != null &&
+				(src instanceof Pawn)) {
+			NoPiece noPiece = new NoPiece(SpecialMove.IS_MOVING_EN_PASSANT.getY().getColor(), SpecialMove.IS_MOVING_EN_PASSANT.getY().getPosition());
+			getBoard().set(noPiece.getPosition(), noPiece);
+			getCurrentPlayer().kill(SpecialMove.IS_MOVING_EN_PASSANT.getY());
+			SpecialMove.IS_MOVING_EN_PASSANT = null;
+		}
+		
 		if (p != null)
 			getCurrentPlayer().kill(p);
+		
+		MoveManager.PREVIOUS_ACTION = new Couple<>(src, pieceSource);
 	}
 	private void move(@NotNull Piece piece, @NotNull Point dest) {
 		move(piece, CPoint.fromPoint(dest));

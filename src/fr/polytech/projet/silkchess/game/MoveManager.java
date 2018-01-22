@@ -1,6 +1,7 @@
 package fr.polytech.projet.silkchess.game;
 
 import com.sun.istack.internal.NotNull;
+import fr.berger.enhancedlist.Couple;
 import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.game.board.Chessboard;
 import fr.polytech.projet.silkchess.game.exceptions.NoPieceException;
@@ -11,6 +12,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 public class MoveManager {
+	
+	public static Couple<Piece, CPoint> PREVIOUS_ACTION = null;
 	
 	/**
 	 * Compute all possible move of the piece located at {@code position}, regarding the board and all special rules,
@@ -35,14 +38,10 @@ public class MoveManager {
 		
 		ArrayList<CPoint> list = piece.possibleMoves();
 		
-		// TODO: Delete the available tiles behind obstacles
-		
 		if (piece instanceof King)
 		{
 			deleteAlliesPositions(board, piece, list);
 			
-			// TODO: The king cannot go to a place where it can place its team in a CHECK state
-			// TODO: if `sm == SpecialMove.CASTLING`, add the castling tile
 			// Search all the friendly rooks
 			ArrayList<Piece> pieces = board.getAll(piece.getColor());
 			
@@ -80,8 +79,7 @@ public class MoveManager {
 		{
 			deleteAlliesPositions(board, piece, list);
 		}
-		else if (piece instanceof Pawn)
-		{
+		else if (piece instanceof Pawn) {
 			boolean canMoveForward = true;
 			
 			Point point = CPoint.toPoint(piece.getPosition());
@@ -105,16 +103,35 @@ public class MoveManager {
 			
 			// Special move: Promotion
 			// TODO: The special move Promotion must be moved somewhere else
-			if ((piece.getColor() == Color.BLACK && point.getY() == board.getNbRows()-1) ||
-					(piece.getColor() == Color.WHITE && point.getY() == 0))
-			{
+			if ((piece.getColor() == Color.BLACK && point.getY() == board.getNbRows() - 1) ||
+					(piece.getColor() == Color.WHITE && point.getY() == 0)) {
 				Queen queen = new Queen(piece.getColor(), piece.getPosition());
 				board.set(piece.getPosition(), queen);
 			}
 			
-			// Special move: En passant
+			// Special move: Eat in diagonal
 			checkIfPawnCanEat(board, list, piece, point.getX() - 1, point.getY() + (piece.getColor() == Color.BLACK ? +1 : -1));
 			checkIfPawnCanEat(board, list, piece, point.getX() + 1, point.getY() + (piece.getColor() == Color.BLACK ? +1 : -1));
+			
+			// Special move: En passant
+			if (PREVIOUS_ACTION != null) {
+				if (SpecialMove.checkIfEnPassantIsPossible(board, (Pawn) piece, PREVIOUS_ACTION)) {
+					int x = CPoint.toPoint(SpecialMove.IS_MOVING_EN_PASSANT.getX().getPosition()).getX(), y = CPoint.toPoint(SpecialMove.IS_MOVING_EN_PASSANT.getX().getPosition()).getY();
+					if (piece.getColor() == Color.BLACK)
+						y++;
+					else
+						y--;
+					
+					if (CPoint.toPoint(SpecialMove.IS_MOVING_EN_PASSANT.getY().getPosition()).getX() < x)
+						x--;
+					else
+						x++;
+					
+					System.out.println("Add point " + CPoint.fromPoint(x, y));
+					if (0 <= x && x < board.getNbColumns() && 0 <= y && y <= board.getNbRows())
+						list.add(CPoint.fromPoint(x, y));
+				}
+			}
 		}
 		
 		return list;
