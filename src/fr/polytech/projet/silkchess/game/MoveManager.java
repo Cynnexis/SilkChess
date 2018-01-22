@@ -127,7 +127,6 @@ public class MoveManager {
 					else
 						x++;
 					
-					System.out.println("Add point " + CPoint.fromPoint(x, y));
 					if (0 <= x && x < board.getNbColumns() && 0 <= y && y <= board.getNbRows())
 						list.add(CPoint.fromPoint(x, y));
 				}

@@ -5,6 +5,8 @@ import com.sun.istack.internal.Nullable;
 import fr.berger.enhancedlist.Couple;
 import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.debug.Debug;
+import fr.polytech.projet.silkchess.game.ai.IntelligenceMode;
+import fr.polytech.projet.silkchess.game.ai.Kartona;
 import fr.polytech.projet.silkchess.game.board.Chessboard;
 import fr.polytech.projet.silkchess.game.exceptions.NoPieceException;
 import fr.polytech.projet.silkchess.game.exceptions.PieceCannotMove;
@@ -30,6 +32,10 @@ public class Engine implements Serializable {
 	private Player pBlack = new Player(Color.BLACK);
 	@NotNull
 	private Player pWhite = new Player(Color.WHITE);
+	@NotNull
+	private boolean useKartona = false;
+	@NotNull
+	private Kartona kartona = new Kartona(IntelligenceMode.RANDOM, Color.BLACK);
 	
 	@NotNull
 	private EngineListener engineListener = new EngineListener() {
@@ -49,37 +55,51 @@ public class Engine implements Serializable {
 	
 	}
 	
-	public void newGame() {
-		board.reset();
+	public void newGame(boolean resetGrid) {
+		setState(GameState.INITIALIZING);
 		
-		// Black
-		board.set('A', 8, new Rook(Color.BLACK, new CPoint('A', 8)));
-		board.set('B', 8, new Knight(Color.BLACK, new CPoint('B', 8)));
-		board.set('C', 8, new Bishop(Color.BLACK, new CPoint('C', 8)));
-		board.set('D', 8, new Queen(Color.BLACK, new CPoint('D', 8)));
-		board.set('E', 8, new King(Color.BLACK, new CPoint('E', 8)));
-		board.set('F', 8, new Bishop(Color.BLACK, new CPoint('F', 8)));
-		board.set('G', 8, new Knight(Color.BLACK, new CPoint('G', 8)));
-		board.set('H', 8, new Rook(Color.BLACK, new CPoint('H', 8)));
+		setCheck(CheckState.NO_CHECKSTATE);
+		pBlack.setNbRound(0);
+		pBlack.setKilledEnemies(new ArrayList<>());
+		pWhite.setNbRound(0);
+		pWhite.setKilledEnemies(new ArrayList<>());
 		
-		for (char x = 'A'; x <= 'H'; x++)
-			board.set(x, 7, new Pawn(Color.BLACK, new CPoint(x, 7)));
-		
-		// White
-		for (char x = 'A'; x <= 'H'; x++)
-			board.set(x, 2, new Pawn(Color.WHITE, new CPoint(x, 2)));
-		
-		board.set('A', 1, new Rook(Color.WHITE, new CPoint('A', 1)));
-		board.set('B', 1, new Knight(Color.WHITE, new CPoint('B', 1)));
-		board.set('C', 1, new Bishop(Color.WHITE, new CPoint('C', 1)));
-		board.set('D', 1, new Queen(Color.WHITE, new CPoint('D', 1)));
-		board.set('E', 1, new King(Color.WHITE, new CPoint('E', 1)));
-		board.set('F', 1, new Bishop(Color.WHITE, new CPoint('F', 1)));
-		board.set('G', 1, new Knight(Color.WHITE, new CPoint('G', 1)));
-		board.set('H', 1, new Rook(Color.WHITE, new CPoint('H', 1)));
+		if (resetGrid) {
+			board.reset();
+			
+			// Black
+			board.set('A', 8, new Rook(Color.BLACK, new CPoint('A', 8)));
+			board.set('B', 8, new Knight(Color.BLACK, new CPoint('B', 8)));
+			board.set('C', 8, new Bishop(Color.BLACK, new CPoint('C', 8)));
+			board.set('D', 8, new Queen(Color.BLACK, new CPoint('D', 8)));
+			board.set('E', 8, new King(Color.BLACK, new CPoint('E', 8)));
+			board.set('F', 8, new Bishop(Color.BLACK, new CPoint('F', 8)));
+			board.set('G', 8, new Knight(Color.BLACK, new CPoint('G', 8)));
+			board.set('H', 8, new Rook(Color.BLACK, new CPoint('H', 8)));
+			
+			for (char x = 'A'; x <= 'H'; x++)
+				board.set(x, 7, new Pawn(Color.BLACK, new CPoint(x, 7)));
+			
+			// White
+			for (char x = 'A'; x <= 'H'; x++)
+				board.set(x, 2, new Pawn(Color.WHITE, new CPoint(x, 2)));
+			
+			board.set('A', 1, new Rook(Color.WHITE, new CPoint('A', 1)));
+			board.set('B', 1, new Knight(Color.WHITE, new CPoint('B', 1)));
+			board.set('C', 1, new Bishop(Color.WHITE, new CPoint('C', 1)));
+			board.set('D', 1, new Queen(Color.WHITE, new CPoint('D', 1)));
+			board.set('E', 1, new King(Color.WHITE, new CPoint('E', 1)));
+			board.set('F', 1, new Bishop(Color.WHITE, new CPoint('F', 1)));
+			board.set('G', 1, new Knight(Color.WHITE, new CPoint('G', 1)));
+			board.set('H', 1, new Rook(Color.WHITE, new CPoint('H', 1)));
+		}
 		
 		// Reset the token to fire onTokenChanged event
 		setToken(getToken());
+		setState(GameState.PLAYING);
+	}
+	public void newGame() {
+		newGame(true);
 	}
 	
 	@SuppressWarnings("SpellCheckingInspection")
@@ -106,6 +126,15 @@ public class Engine implements Serializable {
 		setCheck(Check.checkCheck(getBoard()));
 		
 		invertToken();
+		
+		if (isUseKartona() && getToken() == getKartona().getColor()) {
+			Couple<Piece, CPoint> result = getKartona().think(getBoard());
+			
+			move(result.getX(), result.getY());
+			setCheck(Check.checkCheck(getBoard()));
+			
+			invertToken();
+		}
 	}
 	public void play(@NotNull Point src, @NotNull Point dest) throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
 		play(src.getX(), src.getY(), dest.getX(), dest.getY());
@@ -280,6 +309,23 @@ public class Engine implements Serializable {
 			default:
 				return null;
 		}
+	}
+	
+	public boolean isUseKartona() {
+		return useKartona;
+	}
+	
+	public void setUseKartona(boolean useKartona) {
+		this.useKartona = useKartona;
+	}
+	
+	public Kartona getKartona() {
+		return kartona;
+	}
+	
+	public void setKartona(@NotNull Kartona kartona) {
+		if (kartona != null)
+			this.kartona = kartona;
 	}
 	
 	public EngineListener getEngineListener() {

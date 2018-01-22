@@ -133,7 +133,7 @@ public class Chessboard extends Matrix<Piece> {
 		return list;
 	}
 	
-	public ArrayList<Piece> getAll() {
+	public @NotNull ArrayList<Piece> getAll() {
 		ArrayList<Piece> pieces = new ArrayList<>();
 		for (int i = 0; i < getNbColumns(); i++) {
 			for (int j = 0; j < getNbRows(); j++) {
@@ -144,7 +144,7 @@ public class Chessboard extends Matrix<Piece> {
 		}
 		return pieces;
 	}
-	public ArrayList<Piece> getAll(Color color) {
+	public @NotNull ArrayList<Piece> getAll(Color color) {
 		ArrayList<Piece> pieces = getAll();
 		for (int i = 0; i < pieces.size(); i++) {
 			if (pieces.get(i).getColor() != color) {

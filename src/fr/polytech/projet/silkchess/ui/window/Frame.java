@@ -5,6 +5,7 @@ import fr.berger.enhancedlist.MatrixListener;
 import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.game.*;
 import fr.polytech.projet.silkchess.game.Color;
+import fr.polytech.projet.silkchess.game.ai.IntelligenceMode;
 import fr.polytech.projet.silkchess.game.board.Chessboard;
 import fr.polytech.projet.silkchess.game.exceptions.NoPieceException;
 import fr.polytech.projet.silkchess.game.exceptions.PieceCannotMove;
@@ -26,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class Frame extends JFrame {
 	
 	// Singleton Pattern
@@ -34,10 +36,21 @@ public class Frame extends JFrame {
 	private Engine engine = new Engine();
 	
 	private JMenuBar menuBar = new JMenuBar();
+	
 	private JMenu m_file = new JMenu("File");
+	private JMenuItem mi_newGame = new JMenuItem("New Game");
 	private JMenuItem mi_save = new JMenuItem("Save");
 	private JMenuItem mi_open = new JMenuItem("Open");
 	private JMenuItem mi_quit = new JMenuItem("Exit");
+	
+	private JMenu m_playAgainst = new JMenu("Play Against...");
+	private ButtonGroup bg_playAgainst = new ButtonGroup();
+	private JRadioButtonMenuItem mi_playAgainstPlayer = new JRadioButtonMenuItem("Play Against Player");
+	private JRadioButtonMenuItem mi_playAgainstKartona = new JRadioButtonMenuItem("Play Against Kartona");
+	private JMenu m_kartonaDifficulty = new JMenu("Kartona Difficulty");
+	private ButtonGroup bg_kartonaDifficulty = new ButtonGroup();
+	private JRadioButtonMenuItem mi_kartonaRandom = new JRadioButtonMenuItem("Random");
+	private JRadioButtonMenuItem mi_kartonaStrategy = new JRadioButtonMenuItem("Strategy");
 	
 	private PlayerBoardPanel pbp_black = new PlayerBoardPanel(Color.BLACK);
 	private JChessboard chessboard = new JChessboard(engine.getBoard().getNbColumns(), engine.getBoard().getNbRows());
@@ -81,19 +94,19 @@ public class Frame extends JFrame {
 					case NO_CHECKSTATE:
 						break;
 					case B_CHECK:
-						JOptionPane.showMessageDialog(Frame.this, "Check", "Black is in check", JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.showMessageDialog(Frame.this, "Black is in check", "Check", JOptionPane.INFORMATION_MESSAGE);
 						break;
 					case W_CHECK:
-						JOptionPane.showMessageDialog(Frame.this, "Check", "White is in check", JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.showMessageDialog(Frame.this, "White is in check", "Check", JOptionPane.INFORMATION_MESSAGE);
 						break;
 					case B_CHECKMATE:
-						JOptionPane.showMessageDialog(Frame.this, "Checkmate", "Black is checkmate!", JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.showMessageDialog(Frame.this, "Black is checkmate!", "Checkmate", JOptionPane.INFORMATION_MESSAGE);
 						break;
 					case W_CHECKMATE:
-						JOptionPane.showMessageDialog(Frame.this, "Checkmate", "Black is checkmate!", JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.showMessageDialog(Frame.this, "Black is checkmate!", "Checkmate", JOptionPane.INFORMATION_MESSAGE);
 						break;
 					case STALEMATE:
-						JOptionPane.showMessageDialog(Frame.this, "Stalemate", "Stalemate!", JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.showMessageDialog(Frame.this, "Stalemate!", "Stalemate", JOptionPane.INFORMATION_MESSAGE);
 						break;
 				}
 			}
@@ -158,8 +171,8 @@ public class Frame extends JFrame {
 									chessboard.hightlightTile(CPoint.toPoint(c));
 								
 								selectedTile = tile;
-							} catch (NoPieceException e) {
-								e.printStackTrace();
+							} catch (NoPieceException ignored) {
+								//ignored.printStackTrace();
 							}
 						}
 						else {
@@ -169,16 +182,10 @@ public class Frame extends JFrame {
 					else {
 						try {
 							engine.play(selectedTile.getPiece().getPosition(), tile.getPiece().getPosition());
+						} catch (NoPieceException | PieceDoesNotBelongToPlayerException | TileFullException | PieceCannotMove ignored) {
+							//ignored.printStackTrace();
 						} catch (NullPointerException e) {
 							e.printStackTrace();
-						} catch (NoPieceException e) {
-							e.printStackTrace();
-						} catch (PieceDoesNotBelongToPlayerException e) {
-							e.printStackTrace();
-						} catch (TileFullException e) {
-							e.printStackTrace();
-						} catch (PieceCannotMove pieceCannotMove) {
-							pieceCannotMove.printStackTrace();
 						}
 						
 						chessboard.resetHightlight();
@@ -190,6 +197,11 @@ public class Frame extends JFrame {
 					selectedTile = null;
 				}
 			}
+		});
+		
+		mi_newGame.addActionListener((ActionEvent e) -> {
+			if (engine != null)
+				engine.newGame(true);
 		});
 		
 		mi_save.addActionListener((ActionEvent e) -> {
@@ -219,18 +231,64 @@ public class Frame extends JFrame {
 								engine.getBoard().set(i, j, board.get(i, j));
 					}
 				}
+				
+				engine.newGame(false);
 			}
 		});
 		
-		mi_quit.addActionListener((ActionEvent e) -> {
-			Frame.this.dispose();
+		mi_playAgainstPlayer.addActionListener((ActionEvent e) -> {
+			if (engine != null) {
+				engine.setUseKartona(false);
+				m_kartonaDifficulty.setEnabled(false);
+			}
 		});
 		
+		mi_playAgainstKartona.addActionListener((ActionEvent e) -> {
+			if (engine != null) {
+				engine.setUseKartona(true);
+				m_kartonaDifficulty.setEnabled(true);
+			}
+		});
+		
+		mi_kartonaRandom.addActionListener((ActionEvent e) -> {
+			if (engine != null)
+				engine.getKartona().setMode(IntelligenceMode.RANDOM);
+		});
+		
+		mi_kartonaStrategy.addActionListener((ActionEvent e) -> {
+			if (engine != null)
+				engine.getKartona().setMode(IntelligenceMode.STRATEGY);
+		});
+		
+		mi_quit.addActionListener((ActionEvent e) -> Frame.this.dispose());
+		
+		m_file.add(mi_newGame);
+		m_file.addSeparator();
 		m_file.add(mi_save);
 		m_file.add(mi_open);
+		m_file.addSeparator();
 		m_file.add(mi_quit);
 		
+		bg_playAgainst.add(mi_playAgainstPlayer);
+		bg_playAgainst.add(mi_playAgainstKartona);
+		
+		mi_playAgainstPlayer.setSelected(true);
+		
+		bg_kartonaDifficulty.add(mi_kartonaRandom);
+		bg_kartonaDifficulty.add(mi_kartonaStrategy);
+		
+		mi_kartonaRandom.setSelected(true);
+		
+		m_kartonaDifficulty.add(mi_kartonaRandom);
+		m_kartonaDifficulty.add(mi_kartonaStrategy);
+		
+		m_playAgainst.add(mi_playAgainstPlayer);
+		m_playAgainst.add(mi_playAgainstKartona);
+		m_playAgainst.addSeparator();
+		m_playAgainst.add(m_kartonaDifficulty);
+		
 		menuBar.add(m_file);
+		menuBar.add(m_playAgainst);
 		
 		engine.newGame();
 	}
