@@ -164,6 +164,13 @@ public class Engine implements Serializable {
 		
 		Piece p = getBoard().move(src, dest);
 		
+		// Promotion
+		Pawn pawnToPromote = null;
+		if ((pawnToPromote = SpecialMove.checkIfPromotionIsPossible(getBoard(), src.getColor())) != null) {
+			Queen q = new Queen(pawnToPromote.getColor(), pawnToPromote.getPosition());
+			getBoard().set(q.getPosition(), q);
+		}
+		
 		// Castling move
 		if (SpecialMove.IS_CASTLING != null && SpecialMove.IS_CASTLING.getX() != null && SpecialMove.IS_CASTLING.getY() != null &&
 				(src instanceof King) && src.getPosition().equals(SpecialMove.IS_CASTLING.getX().getPosition())) {

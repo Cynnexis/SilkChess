@@ -56,6 +56,7 @@ public class MoveManager {
 							list.add(new CPoint('C', 1));
 						else if (p.getColor() == Color.WHITE && p.getPosition().equals(new CPoint('H', 1)))
 							list.add(new CPoint('G', 1));
+						break;
 					}
 				}
 			}
@@ -96,18 +97,8 @@ public class MoveManager {
 				canMoveForward = false;
 			}
 			
-			// Special move: First move
-			if (canMoveForward && ((piece.getPosition().getY() == 7 && token == Color.BLACK) || (piece.getPosition().getY() == 2 && token == Color.WHITE))) {
+			if (canMoveForward && SpecialMove.checkIfFirstMoveIsPossible((Pawn) piece))
 				list.add(CPoint.fromPoint(point.getX(), point.getY() + (piece.getColor() == Color.BLACK ? +2 : -2)));
-			}
-			
-			// Special move: Promotion
-			// TODO: The special move Promotion must be moved somewhere else
-			if ((piece.getColor() == Color.BLACK && point.getY() == board.getNbRows() - 1) ||
-					(piece.getColor() == Color.WHITE && point.getY() == 0)) {
-				Queen queen = new Queen(piece.getColor(), piece.getPosition());
-				board.set(piece.getPosition(), queen);
-			}
 			
 			// Special move: Eat in diagonal
 			checkIfPawnCanEat(board, list, piece, point.getX() - 1, point.getY() + (piece.getColor() == Color.BLACK ? +1 : -1));

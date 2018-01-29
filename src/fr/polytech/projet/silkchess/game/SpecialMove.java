@@ -1,6 +1,7 @@
 package fr.polytech.projet.silkchess.game;
 
 import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
 import fr.berger.enhancedlist.Couple;
 import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.game.board.Chessboard;
@@ -87,17 +88,16 @@ public class SpecialMove {
 		if (pawn == null)
 			throw new NullPointerException();
 		
-		return !pawn.hasMoved();
+		return !pawn.hasMoved() && (pawn.getColor() == Color.BLACK ? pawn.getPosition().getY() == 7 : pawn.getPosition().getY() == 2);
 	}
 	
 	/**
 	 *
 	 * @param board
 	 * @param player
-	 * @return Return the index of the pawn which can be promoted. If {@code -1} is returned, then no pawn must be
-	 * promoted.
+	 * @return Return the pawn which can be promoted. If {@code null} is returned, then no pawn must be promoted.
 	 */
-	public static int checkIfPromotionIsPossible(@NotNull Chessboard board, @NotNull Color player) throws NullPointerException {
+	public static @Nullable Pawn checkIfPromotionIsPossible(@NotNull Chessboard board, @NotNull Color player) throws NullPointerException {
 		if (board == null || player == null)
 			throw new NullPointerException();
 		
@@ -112,12 +112,14 @@ public class SpecialMove {
 			if (board.get(i, y) instanceof Pawn) {
 				Pawn p = (Pawn) board.get(i, y);
 				if (p.getColor().equals(player))
-					return i;
+					return p;
 			}
 		}
 		
-		return -1;
+		return null;
 	}
+	
+	// TODO: Fix the bug that kill a piece at the other side of the chessboard!!!!
 	
 	/**
 	 * Check if the "En Passant" move can be realise by {@code pawn} in the chessboard {@code board}. If the move is

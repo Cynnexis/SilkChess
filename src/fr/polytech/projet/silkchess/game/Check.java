@@ -121,6 +121,6 @@ public class Check {
 			if (!checkIfTileIsChecked(board, king.getColor(), list.get(i)))
 				tileNotCheckedDetected = true;
 		
-		return tileNotCheckedDetected;
+		return !tileNotCheckedDetected;
 	}
 }
