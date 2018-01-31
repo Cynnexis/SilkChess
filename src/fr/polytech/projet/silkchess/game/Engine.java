@@ -165,8 +165,8 @@ public class Engine implements Serializable {
 		Piece p = getBoard().move(src, dest);
 		
 		// Promotion
-		Pawn pawnToPromote = null;
-		if ((pawnToPromote = SpecialMove.checkIfPromotionIsPossible(getBoard(), src.getColor())) != null) {
+		Pawn pawnToPromote = SpecialMove.checkIfPromotionIsPossible(getBoard(), src.getColor());
+		if (pawnToPromote != null) {
 			Queen q = new Queen(pawnToPromote.getColor(), pawnToPromote.getPosition());
 			getBoard().set(q.getPosition(), q);
 		}
@@ -188,11 +188,10 @@ public class Engine implements Serializable {
 		
 		// En passant move
 		if (SpecialMove.IS_MOVING_EN_PASSANT != null && SpecialMove.IS_MOVING_EN_PASSANT.getX() != null && SpecialMove.IS_MOVING_EN_PASSANT.getY() != null &&
-				(src instanceof Pawn)) {
+				(src instanceof Pawn) && SpecialMove.IS_MOVING_EN_PASSANT.getX().equals((Pawn) src)) {
 			NoPiece noPiece = new NoPiece(SpecialMove.IS_MOVING_EN_PASSANT.getY().getColor(), SpecialMove.IS_MOVING_EN_PASSANT.getY().getPosition());
 			getBoard().set(noPiece.getPosition(), noPiece);
 			getCurrentPlayer().kill(SpecialMove.IS_MOVING_EN_PASSANT.getY());
-			SpecialMove.IS_MOVING_EN_PASSANT = null;
 		}
 		
 		if (p != null)
@@ -208,6 +207,7 @@ public class Engine implements Serializable {
 	 * Check the chessboard to see if someone won
 	 * @return Return true if one of the two player won
 	 */
+	@Deprecated
 	public boolean checkWin() {
 		boolean result = checkWin(Color.BLACK);
 		
@@ -216,6 +216,7 @@ public class Engine implements Serializable {
 		
 		return result;
 	}
+	@Deprecated
 	public boolean checkWin(@NotNull Color color) {
 		CPoint foeKing = board.search(new King(), Color.invert(color)).get(0);
 		

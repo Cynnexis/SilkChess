@@ -155,18 +155,14 @@ public class SpecialMove {
 		if (pawn.getPosition().getX().equals(previousAction.getX().getPosition().getX()))
 			return false;
 		
+		// If the current pawn and the pawn from the previous action are not (x±1)-aligned, return false
+		if (!CPoint.toPoint(pawn.getPosition()).getX().equals(CPoint.toPoint(previousAction.getX().getPosition()).getX() - 1) && !CPoint.toPoint(pawn.getPosition()).getX().equals(CPoint.toPoint(previousAction.getX().getPosition()).getX() + 1))
+			return false;
+		
 		// If the pawn played in the previous action did not make a double-step move, then return false
 		if (!((previousAction.getX().getColor() == Color.BLACK && CPoint.toPoint(previousAction.getY()).getY() + 2 == CPoint.toPoint(previousAction.getX().getPosition()).getY()) ||
 			 (previousAction.getX().getColor() == Color.WHITE && CPoint.toPoint(previousAction.getY()).getY() - 2 == CPoint.toPoint(previousAction.getX().getPosition()).getY())))
 			return false;
-		
-		/*if (pawn.getColor() == Color.BLACK) {
-			//
-		}
-		else
-		{
-			//
-		}*/
 		
 		IS_MOVING_EN_PASSANT = new Couple<>(pawn, (Pawn) previousAction.getX());
 		

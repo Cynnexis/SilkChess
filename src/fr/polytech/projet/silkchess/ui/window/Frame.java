@@ -233,6 +233,9 @@ public class Frame extends JFrame {
 				}
 				
 				engine.newGame(false);
+				chessboard.resetHightlight();
+				pbp_black.fromPlayer(engine.getpBlack());
+				pbp_white.fromPlayer(engine.getpWhite());
 			}
 		});
 		
