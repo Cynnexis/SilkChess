@@ -62,12 +62,20 @@ public class Check {
 				state = kings.get(i).getColor() == Color.BLACK ? CheckState.B_CHECK : CheckState.W_CHECK;
 		
 		// TODO: Fix this bug
+		
+		/**
+		 * How a checkmate/stalemate is detected:
+		 * CHECKMATE: the king is in check, all tiles around him are in checks, and no ally can help him
+		 * STALEMATE: the king IS NOT in check, all tiles around him are in checks, and no ally can help him
+		 */
+		
 		// If a check is detected, check checkmate
-		/*if (state == CheckState.B_CHECK || state == CheckState.W_CHECK)
+		if (state == CheckState.B_CHECK || state == CheckState.W_CHECK)
 		{
 			// Get all tiles around the checked king
-			King checkedKing = null;
 			
+			// First, get the checked king
+			King checkedKing = null;
 			for (int i = 0; i < kings.size() && checkedKing == null; i++) {
 				if (kings.get(i) != null && (
 					(kings.get(i).getColor() == Color.WHITE && state == CheckState.W_CHECK) ||
@@ -78,13 +86,36 @@ public class Check {
 			try {
 				boolean result = areAllTilesAroundKingChecked(board, checkedKing);
 				
-				if (result)
+				// If all tiles around the king are checked, verify if an ally can help
+				if (result) {
 					//noinspection ConstantConditions
-					state = checkedKing.getColor() == Color.BLACK ? CheckState.B_CHECKMATE : CheckState.W_CHECKMATE;
+					ArrayList<Piece> allies = board.getAll(checkedKing.getColor());
+					
+					boolean allyCanHelp = false;
+					
+					for (int i = 0; i < allies.size() && !allyCanHelp; i++) {
+						ArrayList<CPoint> possibilities = MoveManager.computeAllPossibleMoveWithoutCheck(board, allies.get(i));
+						
+						for (int j = 0; j < possibilities.size() && !allyCanHelp; j++) {
+							// Copy king and the board to perform virtual actions
+							King copyKing = new King(checkedKing.getColor(), checkedKing.getPosition());
+							Chessboard c = new Chessboard(board);
+							
+							c.move(allies.get(i), possibilities.get(j));
+							
+							if (!checkIfPieceIsChecked(c, copyKing))
+								allyCanHelp = true;
+						}
+					}
+					
+					if (!allyCanHelp)
+						state = checkedKing.getColor() == Color.BLACK ? CheckState.B_CHECKMATE : CheckState.W_CHECKMATE;
+				}
+				
 			} catch (NoPieceException ex) {
 				ex.printStackTrace();
 			}
-		}*/
+		}
 		// If a check is not detected, then check stalemate
 		/*else
 		{

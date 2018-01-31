@@ -41,7 +41,7 @@ public abstract class Piece implements Serializable, Movable, Transferable {
 	}
 	public Piece() {
 		setColor(Color.BLACK);
-		setPosition(new CPoint());
+		setPosition(CPoint.fromPoint(0, 0));
 		setHasMoved(false);
 	}
 	
@@ -66,13 +66,15 @@ public abstract class Piece implements Serializable, Movable, Transferable {
 	}
 	
 	public void setPosition(@NotNull CPoint position) {
-		if (position != null) {
-			CPoint oldPos = this.position;
-			this.position = position;
-			
-			if (!oldPos.equals(position))
-				setHasMoved(true);
-		}
+		if (position == null || position.getX() == null || position.getY() == null)
+			//throw new NullPointerException();
+			System.err.println("Position cannot be null");
+		
+		CPoint oldPos = this.position;
+		this.position = position;
+		
+		if (!oldPos.equals(position))
+			setHasMoved(true);
 	}
 	
 	public boolean hasMoved() {

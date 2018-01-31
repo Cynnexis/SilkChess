@@ -103,7 +103,7 @@ public class JChessboard extends JPanel implements Serializable {
 					
 					@Override
 					public void onTileDropStop(Tile stopTile) {
-						// TODO: Do something
+					
 					}
 				});
 				board.set(j, i, t);

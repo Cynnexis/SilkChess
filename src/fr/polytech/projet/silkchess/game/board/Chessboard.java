@@ -111,6 +111,7 @@ public class Chessboard extends Matrix<Piece> {
 		return move(piece, CPoint.fromPoint(dest));
 	}
 	
+	@Deprecated
 	public <T extends Piece> ArrayList<CPoint> search(T piece, Color color) {
 		ArrayList<CPoint> list = new ArrayList<>();
 		
@@ -126,6 +127,21 @@ public class Chessboard extends Matrix<Piece> {
 						(currentP instanceof Knight && piece instanceof Knight) ||
 						(currentP instanceof Pawn && piece instanceof Pawn)
 						&& (currentP.getColor() == color))
+					list.add(currentP.getPosition());
+			}
+		}
+		
+		return list;
+	}
+	public ArrayList<CPoint> search(Class<? extends Piece> piece, Color color) {
+		ArrayList<CPoint> list = new ArrayList<>();
+		
+		for (int i = 0; i < getNbColumns(); i++)
+		{
+			for (int j = 0; j < getNbRows(); j++)
+			{
+				Piece currentP = this.get(i, j);
+				if (piece.isInstance(currentP))
 					list.add(currentP.getPosition());
 			}
 		}

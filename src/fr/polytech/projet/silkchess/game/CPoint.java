@@ -15,7 +15,7 @@ public class CPoint extends Couple<Character, Integer> implements Serializable {
 	}
 	
 	public static Point toPoint(CPoint cpoint) {
-		if (cpoint == null)
+		if (cpoint == null || cpoint.getX() == null || cpoint.getY() == null)
 			return null;
 		return new Point((int) (cpoint.getX() - 'A'), 8 - cpoint.getY());
 	}

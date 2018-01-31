@@ -2,6 +2,7 @@ package fr.polytech.projet.silkchess.game.io;
 
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
+import com.sun.media.sound.InvalidFormatException;
 import fr.polytech.projet.silkchess.game.CPoint;
 import fr.polytech.projet.silkchess.game.Color;
 import fr.polytech.projet.silkchess.game.board.Chessboard;
@@ -97,7 +98,7 @@ public class Saver {
 		return Character.toLowerCase(cpoint.getX()) + "" + Integer.toString(cpoint.getY());
 	}
 	
-	public static @Nullable Chessboard load(File file) {
+	public static @Nullable Chessboard load(File file) throws InvalidFormatException {
 		Chessboard board = new Chessboard();
 		
 		InputStream f = null;
@@ -156,10 +157,17 @@ public class Saver {
 				else if (word.equals("black"))
 					current = Color.BLACK;
 				else {
+					if (current == null)
+						throw new InvalidFormatException("The color is not specified in the game save.");
+					
 					String strPos = words[++i];
 					
 					if (!strPos.equals("") && !strPos.equals("0")) {
 						CPoint pos = pos = new CPoint(strPos.toUpperCase().charAt(0), (int) strPos.charAt(1) - '0');
+						
+						if (!('A' <= pos.getX() && pos.getX() <= 'Z' && 1 <= pos.getY()))
+							throw new InvalidFormatException("The position of the piece is invalid: position = " + pos.toString());
+						
 						Piece piece = new NoPiece(current, pos);
 						if (word.equals("k"))
 							piece = new King(current, pos);
@@ -175,8 +183,11 @@ public class Saver {
 							piece = new Pawn(current, pos);
 						
 						try {
-							if (piece != null && !(piece instanceof NoPiece))
+							if (piece != null && !(piece instanceof NoPiece) && piece.getPosition() != null && piece.getPosition().getX() != null &&
+									piece.getPosition().getY() != null && piece.getColor() != null)
 								board.set(pos, piece);
+							else
+								System.err.println("Invalid piece detected");
 						} catch (IndexOutOfBoundsException ex) {
 							ex.printStackTrace();
 						}

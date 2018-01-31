@@ -119,8 +119,6 @@ public class SpecialMove {
 		return null;
 	}
 	
-	// TODO: Fix the bug that kill a piece at the other side of the chessboard!!!!
-	
 	/**
 	 * Check if the "En Passant" move can be realise by {@code pawn} in the chessboard {@code board}. If the move is
 	 * possible, update the static variable "IS_MOVING_EN_PASSANT"

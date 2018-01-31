@@ -218,14 +218,14 @@ public class Engine implements Serializable {
 	}
 	@Deprecated
 	public boolean checkWin(@NotNull Color color) {
-		CPoint foeKing = board.search(new King(), Color.invert(color)).get(0);
+		CPoint foeKing = board.search(King.class, Color.invert(color)).get(0);
 		
 		ArrayList<CPoint> list = new ArrayList<>();
 		
 		Piece[] allPieces = new Piece[] {new King(), new Queen(), new Rook(), new Bishop(), new Knight(), new Pawn()};
 		
 		for (Piece checkPiece : allPieces) {
-			list = board.search(checkPiece, color);
+			list = board.search(checkPiece.getClass(), color);
 			for (CPoint c : list) {
 				if (canMove(c, foeKing))
 				{
@@ -355,3 +355,6 @@ public class Engine implements Serializable {
 		};
 	}
 }
+
+// TODO: Implement CHECKMATE and STALEMATE detection
+// TODO: Fix bug in Saver which put a black rook in a8

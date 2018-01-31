@@ -1,5 +1,6 @@
 package fr.polytech.projet.silkchess.ui.window;
 
+import com.sun.media.sound.InvalidFormatException;
 import fr.berger.enhancedlist.Matrix;
 import fr.berger.enhancedlist.MatrixListener;
 import fr.berger.enhancedlist.Point;
@@ -220,7 +221,12 @@ public class Frame extends JFrame {
 				int returnValue = jfc.showOpenDialog(Frame.this);
 				
 				if (returnValue == JFileChooser.APPROVE_OPTION) {
-					Chessboard board = Saver.load(jfc.getSelectedFile());
+					Chessboard board = null;
+					try {
+						board = Saver.load(jfc.getSelectedFile());
+					} catch (InvalidFormatException e1) {
+						e1.printStackTrace();
+					}
 					
 					if (board == null) {
 						JOptionPane.showMessageDialog(Frame.this, "The file not found", "Error", JOptionPane.ERROR_MESSAGE);
@@ -229,13 +235,13 @@ public class Frame extends JFrame {
 						for (int i = 0; i < engine.getBoard().getNbColumns(); i++)
 							for (int j = 0; j < engine.getBoard().getNbRows(); j++)
 								engine.getBoard().set(i, j, board.get(i, j));
+						
+						engine.newGame(false);
+						chessboard.resetHightlight();
+						pbp_black.fromPlayer(engine.getpBlack());
+						pbp_white.fromPlayer(engine.getpWhite());
 					}
 				}
-				
-				engine.newGame(false);
-				chessboard.resetHightlight();
-				pbp_black.fromPlayer(engine.getpBlack());
-				pbp_white.fromPlayer(engine.getpWhite());
 			}
 		});
 		

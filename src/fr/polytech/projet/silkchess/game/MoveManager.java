@@ -28,10 +28,13 @@ public class MoveManager {
 	 * @see CPoint
 	 */
 	public static ArrayList<CPoint> computeAllPossibleMoveWithoutCheck(@NotNull Chessboard board, @NotNull Color token, @NotNull CPoint position) throws NoPieceException {
-		if (position == null)
+		if (board == null || token == null || position == null)
 			return null;
 		
-		Piece piece = board.get(CPoint.toPoint(position));
+		Piece piece = board.get(position);
+		
+		if (piece == null)
+			throw new NullPointerException();
 		
 		if (piece instanceof NoPiece)
 			throw new NoPieceException(position);
@@ -87,9 +90,6 @@ public class MoveManager {
 			
 			// Get the only available position:
 			Point pos = CPoint.toPoint(list.get(0));
-			// TODO: Delete
-			//CPoint cpos = piece.getPosition();
-			//Point pos = new Point(CPoint.toPoint(cpos).getX(), CPoint.toPoint(cpos).getY() + (piece.getColor() == Color.BLACK ? +1 : -1));
 			
 			// If this position is occupied by a piece, the pawn cannot go there
 			if (!(board.get(pos) instanceof NoPiece)) {
