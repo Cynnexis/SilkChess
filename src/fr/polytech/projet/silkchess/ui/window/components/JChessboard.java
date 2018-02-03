@@ -2,8 +2,8 @@ package fr.polytech.projet.silkchess.ui.window.components;
 
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
-import fr.berger.enhancedlist.Matrix;
-import fr.berger.enhancedlist.MatrixListener;
+import fr.berger.enhancedlist.matrix.Matrix;
+import fr.berger.enhancedlist.matrix.MatrixListener;
 import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.game.CPoint;
 import fr.polytech.projet.silkchess.game.Color;

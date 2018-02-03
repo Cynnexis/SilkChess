@@ -2,8 +2,8 @@ package fr.polytech.projet.silkchess.game.board;
 
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
-import fr.berger.enhancedlist.Matrix;
 import fr.berger.enhancedlist.Point;
+import fr.berger.enhancedlist.matrix.Matrix;
 import fr.polytech.projet.silkchess.debug.Debug;
 import fr.polytech.projet.silkchess.game.CPoint;
 import fr.polytech.projet.silkchess.game.Color;
@@ -57,8 +57,6 @@ public class Chessboard extends Matrix<Piece> {
 		for (int i = 0; i < getNbColumns(); i++)
 			for (int j = 0; j < getNbRows(); j++)
 				this.set(i, j, new NoPiece(CPoint.fromPoint(i, j)));
-		
-		this.set('A', 8, new Rook());
 	}
 	
 	/*public boolean move(CPoint source, CPoint dest) {
@@ -83,10 +81,10 @@ public class Chessboard extends Matrix<Piece> {
 		return move(new Point(sourceX, sourceY), new Point(destX, destY));
 	}*/
 	
-	public Piece get(CPoint cpoint) {
+	public @Nullable Piece get(CPoint cpoint) {
 		return this.get(cpoint.getX() - 'A', getNbRows() - cpoint.getY());
 	}
-	public Piece get(char x, int y) {
+	public @Nullable Piece get(char x, int y) {
 		return this.get(new CPoint(x, y));
 	}
 	

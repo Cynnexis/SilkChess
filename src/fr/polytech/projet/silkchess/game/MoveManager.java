@@ -97,7 +97,7 @@ public class MoveManager {
 				canMoveForward = false;
 			}
 			
-			if (canMoveForward && SpecialMove.checkIfFirstMoveIsPossible((Pawn) piece))
+			if (canMoveForward && SpecialMove.checkIfFirstMoveIsPossible(board, (Pawn) piece))
 				list.add(CPoint.fromPoint(point.getX(), point.getY() + (piece.getColor() == Color.BLACK ? +2 : -2)));
 			
 			// Special move: Eat in diagonal

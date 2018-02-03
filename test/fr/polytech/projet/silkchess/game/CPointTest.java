@@ -1,11 +1,12 @@
-package fr.polytech.projet.silkchess.tests;
+package fr.polytech.projet.silkchess.game;
 
 import fr.berger.enhancedlist.Point;
-import fr.polytech.projet.silkchess.game.CPoint;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class CPointTest {
 	

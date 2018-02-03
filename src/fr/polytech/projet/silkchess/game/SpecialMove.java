@@ -4,19 +4,19 @@ import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 import fr.berger.enhancedlist.Couple;
 import fr.berger.enhancedlist.Point;
+import fr.polytech.projet.silkchess.game.ai.minimax.ChessMinimax;
 import fr.polytech.projet.silkchess.game.board.Chessboard;
 import fr.polytech.projet.silkchess.game.pieces.*;
 
 import java.io.Serializable;
 
+/**
+ * SpecialMove is a class which manage all the special moves in a chess game. Those methods check if a special move
+ * is possible, and if so, give information to perform it.
+ * @author Valentin Berger
+ * @see MoveManager
+ */
 public class SpecialMove {
-	/*
-	NOTHING, // No Special Move
-	CASTLING, // Move that involves the King and a Rook
-	FIRST_MOVE, // A Pawn can go 2 tiles ahead
-	PROMOTION, // A Pawn which is in the last row becomes a Queen
-	EN_PASSANT // A Pawn kills enemies in diagonal
-	*/
 	
 	/**
 	 * Data to perform the "Castling" move. The first component is the king to move, and the second the rook to move
@@ -29,6 +29,9 @@ public class SpecialMove {
 	 */
 	public static Couple<Pawn, Pawn> IS_MOVING_EN_PASSANT = null;
 	
+	// This class cannot be instanciated
+	private SpecialMove() { }
+	
 	public static boolean checkIfCastlingIsPossible(@NotNull Chessboard board, @NotNull King king, @NotNull Rook rook, boolean checkCheck) throws NullPointerException {
 		if (board == null || king == null || rook == null)
 			throw new NullPointerException();
@@ -37,8 +40,12 @@ public class SpecialMove {
 		if (!king.getColor().equals(rook.getColor()))
 			return false;
 		
-		// Check if the rook and the king has been moved before
+		// Check if the rook and the king has moved before
 		if (rook.hasMoved() || king.hasMoved())
+			return false;
+		
+		// Check if the two pieces are not x-aligned
+		if (rook.getPosition().getX().equals(king.getPosition().getX()))
 			return false;
 		
 		// Check if the two pieces are aligned on an horizontal line
@@ -71,24 +78,32 @@ public class SpecialMove {
 			if (!(board.get(i, CPoint.toPoint(rook.getPosition()).getY()) instanceof NoPiece))
 				return false;
 			
+			// Increment or decrement 'i' according to the rook's position
 			if (rookOnLeft)
 				i++;
 			else
 				i--;
 		}
 		
+		// Castling move is possible. The method updates the 'IS_CASTLING' static attribute to share the necessary
+		// information to perform this special move.
 		IS_CASTLING = new Couple<>(king, rook);
+		
 		return true;
 	}
 	public static boolean checkIfCastlingIsPossible(@NotNull Chessboard board, @NotNull King king, @NotNull Rook rook) throws NullPointerException {
 		return checkIfCastlingIsPossible(board, king, rook, true);
 	}
 	
-	public static boolean checkIfFirstMoveIsPossible(@NotNull Pawn pawn) throws NullPointerException {
+	public static boolean checkIfFirstMoveIsPossible(@NotNull Chessboard board, @NotNull Pawn pawn) throws NullPointerException {
 		if (pawn == null)
 			throw new NullPointerException();
 		
-		return !pawn.hasMoved() && (pawn.getColor() == Color.BLACK ? pawn.getPosition().getY() == 7 : pawn.getPosition().getY() == 2);
+		return !pawn.hasMoved() &&
+				(pawn.getColor() == Color.BLACK ? pawn.getPosition().getY() == 7 : pawn.getPosition().getY() == 2) &&
+				// No piece ahead and two tiles ahead
+				(pawn.getColor() == Color.BLACK ? board.get(pawn.getPosition().getX(), 6) instanceof NoPiece : board.get(pawn.getPosition().getX(), 3) instanceof NoPiece) &&
+				(pawn.getColor() == Color.BLACK ? board.get(pawn.getPosition().getX(), 5) instanceof NoPiece : board.get(pawn.getPosition().getX(), 4) instanceof NoPiece);
 	}
 	
 	/**

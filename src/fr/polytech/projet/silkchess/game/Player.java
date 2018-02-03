@@ -23,7 +23,7 @@ public class Player {
 		public void onKilledEnemyAdded(Piece killedEnemy) { }
 	};
 	
-	public Player(Color color) {
+	public Player(@NotNull Color color) {
 		setColor(color);
 		setNbRound(0);
 		setKilledEnemies(new ArrayList<>());

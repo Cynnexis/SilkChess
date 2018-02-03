@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public abstract class Piece implements Serializable, Movable, Transferable {
+public abstract class Piece implements Serializable, Movable, Cloneable, Transferable {
 
 	public static final DataFlavor PIECE_DATA_FLAVOR = new DataFlavor(Piece.class, "java/Piece");
 	
@@ -108,6 +108,11 @@ public abstract class Piece implements Serializable, Movable, Transferable {
 				"color=" + (color != null ? color.toString() : "(null)") +
 				", position=" + (position != null ? position.toString() : "(null)") +
 				'}';
+	}
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
 	}
 	
 	@Override

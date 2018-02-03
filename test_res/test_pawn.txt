@@ -1,0 +1,2 @@
+black p1 h7 k c6 q g4
+white p1 g2 k e1 q d1

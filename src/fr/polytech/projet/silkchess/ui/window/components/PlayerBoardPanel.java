@@ -63,6 +63,10 @@ public class PlayerBoardPanel extends JPanel {
 		l_token.setText(enable ? color.name() + ", you can play!" : "");
 	}
 	
+	public void resetGraveyard() {
+		l_killedEnemies.setText("");
+	}
+	
 	/* GETTER & SETTER */
 	
 	public @NotNull fr.polytech.projet.silkchess.game.Color getColor() {

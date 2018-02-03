@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Transferable;
 
+@Deprecated
 public class TileTransferHandler extends TransferHandler {
 	
 	public TileTransferHandler() {

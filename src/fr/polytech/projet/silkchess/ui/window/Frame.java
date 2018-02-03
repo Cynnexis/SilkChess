@@ -1,8 +1,8 @@
 package fr.polytech.projet.silkchess.ui.window;
 
 import com.sun.media.sound.InvalidFormatException;
-import fr.berger.enhancedlist.Matrix;
-import fr.berger.enhancedlist.MatrixListener;
+import fr.berger.enhancedlist.matrix.Matrix;
+import fr.berger.enhancedlist.matrix.MatrixListener;
 import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.game.*;
 import fr.polytech.projet.silkchess.game.Color;
@@ -85,7 +85,23 @@ public class Frame extends JFrame {
 			
 			@Override
 			public void onGameStateChanged(GameState oldState, GameState newState) {
-			
+				switch (newState) {
+					case INITIALIZING:
+						chessboard.resetHightlight();
+						break;
+					case PLAYING:
+						break;
+					case PAUSE:
+						break;
+					case B_WIN:
+						JOptionPane.showMessageDialog(Frame.this, "Black won!", "Checkmate", JOptionPane.INFORMATION_MESSAGE);
+						chessboard.resetHightlight();
+						break;
+					case W_WIN:
+						JOptionPane.showMessageDialog(Frame.this, "White won!", "Checkmate", JOptionPane.INFORMATION_MESSAGE);
+						chessboard.resetHightlight();
+						break;
+				}
 			}
 			
 			@Override
@@ -96,18 +112,23 @@ public class Frame extends JFrame {
 						break;
 					case B_CHECK:
 						JOptionPane.showMessageDialog(Frame.this, "Black is in check", "Check", JOptionPane.INFORMATION_MESSAGE);
+						chessboard.resetHightlight();
 						break;
 					case W_CHECK:
 						JOptionPane.showMessageDialog(Frame.this, "White is in check", "Check", JOptionPane.INFORMATION_MESSAGE);
+						chessboard.resetHightlight();
 						break;
 					case B_CHECKMATE:
 						JOptionPane.showMessageDialog(Frame.this, "Black is checkmate!", "Checkmate", JOptionPane.INFORMATION_MESSAGE);
+						chessboard.resetHightlight();
 						break;
 					case W_CHECKMATE:
 						JOptionPane.showMessageDialog(Frame.this, "Black is checkmate!", "Checkmate", JOptionPane.INFORMATION_MESSAGE);
+						chessboard.resetHightlight();
 						break;
 					case STALEMATE:
 						JOptionPane.showMessageDialog(Frame.this, "Stalemate!", "Stalemate", JOptionPane.INFORMATION_MESSAGE);
+						chessboard.resetHightlight();
 						break;
 				}
 			}
@@ -238,8 +259,8 @@ public class Frame extends JFrame {
 						
 						engine.newGame(false);
 						chessboard.resetHightlight();
-						pbp_black.fromPlayer(engine.getpBlack());
-						pbp_white.fromPlayer(engine.getpWhite());
+						pbp_black.resetGraveyard();
+						pbp_white.resetGraveyard();
 					}
 				}
 			}

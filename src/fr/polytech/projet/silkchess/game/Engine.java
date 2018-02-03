@@ -104,36 +104,42 @@ public class Engine implements Serializable {
 	
 	@SuppressWarnings("SpellCheckingInspection")
 	public void play(int xsrc, int ysrc, int xdest, int ydest) throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
-		Piece srcpiece = board.get(xsrc, ysrc);
-		Piece destpiece = board.get(xdest, ydest);
-		
-		if (srcpiece == null || srcpiece.getPosition() == null || destpiece == null || destpiece.getPosition() == null)
-			throw new NullPointerException();
-		
-		if (srcpiece instanceof NoPiece)
-			throw new NoPieceException(srcpiece.getPosition());
-		
-		if (srcpiece.getColor() != token)
-			throw new PieceDoesNotBelongToPlayerException(srcpiece, token);
-		
-		if (!canMove(CPoint.fromPoint(xsrc, ysrc), CPoint.fromPoint(xdest, ydest)))
-			throw new PieceCannotMove(srcpiece, new Point(xdest, ydest));
-		
-		move(srcpiece, destpiece.getPosition());
-		
-		getCurrentPlayer().setNbRound(getCurrentPlayer().getNbRound() + 1);
-		
-		setCheck(Check.checkCheck(getBoard()));
-		
-		invertToken();
-		
-		if (isUseKartona() && getToken() == getKartona().getColor()) {
-			Couple<Piece, CPoint> result = getKartona().think(getBoard());
+		if (getState() == GameState.PLAYING) {
+			Piece srcpiece = board.get(xsrc, ysrc);
+			Piece destpiece = board.get(xdest, ydest);
 			
-			move(result.getX(), result.getY());
+			if (srcpiece == null || srcpiece.getPosition() == null || destpiece == null || destpiece.getPosition() == null)
+				throw new NullPointerException();
+			
+			if (srcpiece instanceof NoPiece)
+				throw new NoPieceException(srcpiece.getPosition());
+			
+			if (srcpiece.getColor() != token)
+				throw new PieceDoesNotBelongToPlayerException(srcpiece, token);
+			
+			if (!canMove(CPoint.fromPoint(xsrc, ysrc), CPoint.fromPoint(xdest, ydest)))
+				throw new PieceCannotMove(srcpiece, new Point(xdest, ydest));
+			
+			move(srcpiece, destpiece.getPosition());
+			
+			getCurrentPlayer().setNbRound(getCurrentPlayer().getNbRound() + 1);
+			
 			setCheck(Check.checkCheck(getBoard()));
 			
 			invertToken();
+			
+			if (isUseKartona() && getToken() == getKartona().getColor()) {
+				Couple<Piece, CPoint> result = getKartona().think(getBoard());
+				
+				if (result != null) {
+					move(result.getX(), result.getY());
+					setCheck(Check.checkCheck(getBoard()));
+					
+					invertToken();
+				}
+				else
+					setState(getKartona().getColor() == Color.BLACK ? GameState.W_WIN : GameState.B_WIN);
+			}
 		}
 	}
 	public void play(@NotNull Point src, @NotNull Point dest) throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
@@ -357,4 +363,5 @@ public class Engine implements Serializable {
 }
 
 // TODO: Implement CHECKMATE and STALEMATE detection
-// TODO: Fix bug in Saver which put a black rook in a8
+// TODO: Fix the Castling bug, which delete the rook
+// TODO: Implement Minimax algorithm
