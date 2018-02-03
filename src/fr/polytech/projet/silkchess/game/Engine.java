@@ -370,4 +370,3 @@ public class Engine implements Serializable {
 // TODO: Implement CHECKMATE and STALEMATE detection
 // TODO: Fix the Castling bug, which delete the rook
 // TODO: Implement Minimax algorithm
-// TODO: Implement Save dialog

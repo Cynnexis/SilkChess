@@ -3,7 +3,6 @@ package fr.polytech.projet.silkchess.ui.window.components;
 import com.sun.istack.internal.NotNull;
 import fr.polytech.projet.silkchess.debug.Debug;
 import fr.polytech.projet.silkchess.game.CPoint;
-import fr.polytech.projet.silkchess.game.Check;
 import fr.polytech.projet.silkchess.game.Color;
 import fr.polytech.projet.silkchess.game.pieces.*;
 import fr.polytech.projet.silkchess.ui.preferences.EPref;
@@ -122,7 +121,7 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 	
 	@Override
 	public void mousePressed(MouseEvent e) {
-		if (Pref.getBoolean(EPref.CHESSBOARD_CONTROL)) {
+		/*if (Pref.getBoolean(EPref.CHESSBOARD_CONTROL)) {
 			tileListener.onTileDropBegin(this);
 			
 			JComponent comp = (JComponent) e.getSource();
@@ -131,7 +130,7 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 			Debug.println("Tile.mousePressed> comp: (Tile) (Piece) " + ((Tile) comp).getPiece().toString() + "\n\tth: " + th.toString() + "\n\te: " + e.toString());
 			
 			th.exportAsDrag(this, e, TransferHandler.MOVE);
-		}
+		}*/
 	}
 	
 	@Override

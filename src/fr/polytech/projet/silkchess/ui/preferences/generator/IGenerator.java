@@ -1,5 +1,6 @@
 package fr.polytech.projet.silkchess.ui.preferences.generator;
 
+@Deprecated
 public interface IGenerator {
 	
 	/**

@@ -4,6 +4,7 @@ import com.sun.istack.internal.NotNull;
 
 import java.io.Serializable;
 
+@Deprecated
 public enum EPref implements Serializable {
 	FIRSTTIME("firsttime", boolean.class, false),
 	CHESSBOARD_CONTROL("chessboard.control", boolean.class, false);
