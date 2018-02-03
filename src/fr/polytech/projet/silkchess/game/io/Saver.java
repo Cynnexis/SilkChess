@@ -20,13 +20,14 @@ public class Saver {
 	public static String DIRECTORY = "";
 	public static String FILENAME = "save-{$date}.txt";
 	
-	public static void save(@NotNull Chessboard board, @NotNull String path) {
+	public static boolean save(@NotNull Chessboard board, @NotNull String path) {
 		if (board == null || path == null)
 			throw new NullPointerException();
 		
 		if (path.equals(""))
 			throw new IllegalArgumentException();
 		
+		boolean result = true;
 		StringBuilder builder = new StringBuilder();
 		
 		ArrayList<Piece> black = board.getAll(Color.BLACK);
@@ -78,6 +79,7 @@ public class Saver {
 			bw.write(builder.toString());
 		} catch (IOException ex) {
 			ex.printStackTrace();
+			result = false;
 		} finally {
 			try {
 				if (bw != null)
@@ -87,11 +89,14 @@ public class Saver {
 					fw.close();
 			} catch (IOException ex) {
 				ex.printStackTrace();
+				result = false;
 			}
 		}
+		
+		return result;
 	}
-	public static void save(@NotNull Chessboard board) {
-		save(board, DIRECTORY + (DIRECTORY.equals("") ? "" : File.separator) + getFilename());
+	public static boolean save(@NotNull Chessboard board) {
+		return save(board, DIRECTORY + (DIRECTORY.equals("") ? "" : File.separator) + getFilename());
 	}
 	
 	public static @NotNull String CPoint2String(CPoint cpoint) {

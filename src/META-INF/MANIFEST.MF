@@ -1,3 +1,10 @@
 Manifest-Version: 1.0
 Main-Class: fr.polytech.projet.silkchess.SilkChess
 
+Name: fr/polytech/projet/silkchess/
+Specification-Title: "Silk Chess"
+Specification-Version: "1.0"
+Specification-Vendor: "Polytech Corporation"
+Implementation-Title: "Silk Chess"
+Implementation-Version: "2018.02.04"
+Implementation-Vendor: "Polytech Corporation"

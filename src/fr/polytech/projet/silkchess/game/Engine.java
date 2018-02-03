@@ -13,6 +13,7 @@ import fr.polytech.projet.silkchess.game.exceptions.PieceCannotMove;
 import fr.polytech.projet.silkchess.game.exceptions.PieceDoesNotBelongToPlayerException;
 import fr.polytech.projet.silkchess.game.exceptions.TileFullException;
 import fr.polytech.projet.silkchess.game.pieces.*;
+import org.jetbrains.annotations.Contract;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;
@@ -51,9 +52,7 @@ public class Engine implements Serializable {
 		public void onPieceKilled(Piece pieceKilled) { }
 	};
 	
-	public Engine() {
-	
-	}
+	public Engine() { }
 	
 	public void newGame(boolean resetGrid) {
 		setState(GameState.INITIALIZING);
@@ -103,7 +102,8 @@ public class Engine implements Serializable {
 	}
 	
 	@SuppressWarnings("SpellCheckingInspection")
-	public void play(int xsrc, int ysrc, int xdest, int ydest) throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
+	public void play(int xsrc, int ysrc, int xdest, int ydest)
+			throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, PieceCannotMove {
 		if (getState() == GameState.PLAYING) {
 			Piece srcpiece = board.get(xsrc, ysrc);
 			Piece destpiece = board.get(xdest, ydest);
@@ -142,14 +142,17 @@ public class Engine implements Serializable {
 			}
 		}
 	}
-	public void play(@NotNull Point src, @NotNull Point dest) throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
+	public void play(@NotNull Point src, @NotNull Point dest)
+			throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
 		play(src.getX(), src.getY(), dest.getX(), dest.getY());
 	}
 	@SuppressWarnings("SpellCheckingInspection")
-	public void play(char xsrc, int ysrc, char xdest, int ydest) throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
+	public void play(char xsrc, int ysrc, char xdest, int ydest)
+			throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
 		play(new CPoint(xsrc, ysrc), new CPoint(xdest, ydest));
 	}
-	public void play(@NotNull CPoint src, @NotNull CPoint dest) throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
+	public void play(@NotNull CPoint src, @NotNull CPoint dest)
+			throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
 		play(CPoint.toPoint(src), CPoint.toPoint(dest));
 	}
 	
@@ -162,6 +165,7 @@ public class Engine implements Serializable {
 		return false;
 	}
 	
+	@Contract("null, _ -> fail; !null, null -> fail")
 	private void move(@NotNull Piece src, @NotNull CPoint dest) {
 		if (src == null || dest == null)
 			throw new NullPointerException();
@@ -205,6 +209,7 @@ public class Engine implements Serializable {
 		
 		MoveManager.PREVIOUS_ACTION = new Couple<>(src, pieceSource);
 	}
+	@Contract("null, _ -> fail")
 	private void move(@NotNull Piece piece, @NotNull Point dest) {
 		move(piece, CPoint.fromPoint(dest));
 	}
@@ -365,3 +370,4 @@ public class Engine implements Serializable {
 // TODO: Implement CHECKMATE and STALEMATE detection
 // TODO: Fix the Castling bug, which delete the rook
 // TODO: Implement Minimax algorithm
+// TODO: Implement Save dialog

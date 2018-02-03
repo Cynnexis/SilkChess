@@ -227,8 +227,24 @@ public class Frame extends JFrame {
 		});
 		
 		mi_save.addActionListener((ActionEvent e) -> {
-			if (engine != null)
-				Saver.save(engine.getBoard());
+			if (engine != null) {
+				JFileChooser jfc = new JFileChooser("./");
+				jfc.setDialogTitle("Save chessboard...");
+				jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				jfc.setMultiSelectionEnabled(false);
+				FileNameExtensionFilter filter = new FileNameExtensionFilter("Text file | (*.txt)", "txt");
+				jfc.addChoosableFileFilter(filter);
+				jfc.setFileFilter(filter);
+				int returnValue = jfc.showSaveDialog(Frame.this);
+				
+				if (returnValue == JFileChooser.APPROVE_OPTION) {
+					String path = jfc.getSelectedFile().getAbsolutePath();
+					if (!path.endsWith(".txt"))
+						path += ".txt";
+					if (!Saver.save(engine.getBoard(), path))
+						Saver.save(engine.getBoard());
+				}
+			}
 		});
 		
 		mi_open.addActionListener((ActionEvent e) -> {
