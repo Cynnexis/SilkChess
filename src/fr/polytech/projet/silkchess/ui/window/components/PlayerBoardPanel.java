@@ -16,14 +16,9 @@ public class PlayerBoardPanel extends JPanel {
 	private fr.polytech.projet.silkchess.game.Color color = fr.polytech.projet.silkchess.game.Color.BLACK;
 	
 	private JLabel l_token = new JLabel("");
-	/*private JLabel l_nbRoundText = new JLabel("Number of rounds: ");
-	private JLabel l_nbRound = new JLabel("");*/
 	private JLabel l_killedEnemiesText = new JLabel("Killed enemies: ");
 	private JScrollPane sp_killedEnemies = new JScrollPane();
 	private JLabel l_killedEnemies = new JLabel("");
-	
-	/*private JPanel p_round = new JPanel();
-	private GridLayout gl_round = new GridLayout(1, 2);*/
 	
 	private GridLayout gl_main = new GridLayout(5, 1, 5, 5);
 	
@@ -31,10 +26,6 @@ public class PlayerBoardPanel extends JPanel {
 		setColor(color);
 		
 		this.setLayout(gl_main);
-		
-		/*p_round.setLayout(gl_round);
-		p_round.add(l_nbRoundText);
-		p_round.add(l_nbRound);*/
 		
 		sp_killedEnemies.add(l_killedEnemies);
 		
@@ -49,8 +40,6 @@ public class PlayerBoardPanel extends JPanel {
 	public void fromPlayer(@NotNull Player player) {
 		if (player == null)
 			return;
-		
-		//l_nbRound.setText(Integer.toString(player.getNbRound()));
 		
 		ArrayList<Piece> pieces = player.getKilledEnemies();
 		l_killedEnemies.setText("");
