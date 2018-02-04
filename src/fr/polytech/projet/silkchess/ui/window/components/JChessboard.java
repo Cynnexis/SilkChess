@@ -19,9 +19,15 @@ import java.awt.event.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * JChessboard is a graphic component for javax.swing application
+ * @author Valentin Berger
+ * @see JPanel
+ * @see Tile
+ * @see JChessboardListener
+ * @see Matrix
+ */
 public class JChessboard extends JPanel implements Serializable {
-	
-	// TODO: Create forceSquaredTiles
 	
 	private Matrix<Tile> board;
 	
@@ -174,11 +180,18 @@ public class JChessboard extends JPanel implements Serializable {
 		}
 	}
 	
+	/**
+	 * Add a blue circle for the tile at the coordinates {@code point}
+	 * @param point The coordinates of the tile to highlight
+	 */
 	public void hightlightTile(Point point) {
 		//getBoard().get(point).setBackground(java.awt.Color.BLUE);
 		getBoard().get(point).setHighlight(true);
 	}
 	
+	/**
+	 * Clear all highlighted tiles
+	 */
 	public void resetHightlight() {
 		for (int i = 0; i < getBoard().getNbColumns(); i++) {
 			for (int j = 0; j < getBoard().getNbRows(); j++) {

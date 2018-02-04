@@ -19,6 +19,10 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * Engine for the game 'chess'
+ * @author Valentin Berger
+ */
 public class Engine implements Serializable {
 	
 	@NotNull
@@ -52,8 +56,15 @@ public class Engine implements Serializable {
 		public void onPieceKilled(Piece pieceKilled) { }
 	};
 	
+	/**
+	 * Default Constructor
+	 */
 	public Engine() { }
 	
+	/**
+	 * Reset all parameters to create a new game
+	 * @param resetGrid If {@code true}, the chessboard is also reset
+	 */
 	public void newGame(boolean resetGrid) {
 		setState(GameState.INITIALIZING);
 		
@@ -97,10 +108,24 @@ public class Engine implements Serializable {
 		setToken(getToken());
 		setState(GameState.PLAYING);
 	}
+	/**
+	 * Reset all parameters to create a new game and a new chessboard
+	 */
 	public void newGame() {
 		newGame(true);
 	}
 	
+	/**
+	 * Play one move
+	 * @param xsrc The x coordinate of the source piece
+	 * @param ysrc The y coordinate of the source piece
+	 * @param xdest The x coordinate of the destination
+	 * @param ydest The y coordinate of the destination
+	 * @throws NullPointerException
+	 * @throws NoPieceException
+	 * @throws PieceDoesNotBelongToPlayerException
+	 * @throws PieceCannotMove
+	 */
 	@SuppressWarnings("SpellCheckingInspection")
 	public void play(int xsrc, int ysrc, int xdest, int ydest)
 			throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, PieceCannotMove {
@@ -144,6 +169,15 @@ public class Engine implements Serializable {
 			//System.out.println(getBoard().toString());
 		}
 	}
+	/**
+	 * Play one move
+	 * @param src The source of the piece
+	 * @param dest The the destination
+	 * @throws NullPointerException
+	 * @throws NoPieceException
+	 * @throws PieceDoesNotBelongToPlayerException
+	 * @throws PieceCannotMove
+	 */
 	public void play(@NotNull Point src, @NotNull Point dest)
 			throws NullPointerException, NoPieceException, PieceDoesNotBelongToPlayerException, TileFullException, PieceCannotMove {
 		play(src.getX(), src.getY(), dest.getX(), dest.getY());
@@ -158,6 +192,12 @@ public class Engine implements Serializable {
 		play(CPoint.toPoint(src), CPoint.toPoint(dest));
 	}
 	
+	/**
+	 * Indicates if a piece can move to a tile
+	 * @param point The source of the piece
+	 * @param dest The destination
+	 * @return Return {@code true} if the piece can move, {@code false} otherwise
+	 */
 	public boolean canMove(@NotNull CPoint point, @NotNull CPoint dest) {
 		try {
 			return MoveManager.computeAllPossibleMoveWithCheck(getBoard(), getToken(), point).contains(dest);
@@ -167,6 +207,11 @@ public class Engine implements Serializable {
 		return false;
 	}
 	
+	/**
+	 * Make the piece move. If the destination tile is already occupied, the old piece is eaten
+	 * @param src
+	 * @param dest
+	 */
 	@Contract("null, _ -> fail; !null, null -> fail")
 	private void move(@NotNull Piece src, @NotNull CPoint dest) {
 		if (src == null || dest == null)
@@ -217,42 +262,6 @@ public class Engine implements Serializable {
 	@Contract("null, _ -> fail")
 	private void move(@NotNull Piece piece, @NotNull Point dest) {
 		move(piece, CPoint.fromPoint(dest));
-	}
-	
-	/**
-	 * Check the chessboard to see if someone won
-	 * @return Return true if one of the two player won
-	 */
-	@Deprecated
-	public boolean checkWin() {
-		boolean result = checkWin(Color.BLACK);
-		
-		if (!result)
-			result = checkWin(Color.WHITE);
-		
-		return result;
-	}
-	@Deprecated
-	public boolean checkWin(@NotNull Color color) {
-		CPoint foeKing = board.search(King.class, Color.invert(color)).get(0);
-		
-		ArrayList<CPoint> list = new ArrayList<>();
-		
-		Piece[] allPieces = new Piece[] {new King(), new Queen(), new Rook(), new Bishop(), new Knight(), new Pawn()};
-		
-		for (Piece checkPiece : allPieces) {
-			list = board.search(checkPiece.getClass(), color);
-			for (CPoint c : list) {
-				if (canMove(c, foeKing))
-				{
-					// TODO: Finish this method
-					
-					return true;
-				}
-			}
-		}
-		
-		return false;
 	}
 	
 	/* GETTERS & SETTERS */
@@ -397,6 +406,3 @@ public class Engine implements Serializable {
 		};
 	}
 }
-
-// TODO: Implement Minimax algorithm
-// TODO: Bug that make Kartona bug when enable when black must play.

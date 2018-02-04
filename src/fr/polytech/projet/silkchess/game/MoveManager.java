@@ -11,8 +11,16 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
+/**
+ * This class manage all the possible move for a piece.
+ * @author Valentin Berger
+ */
 public class MoveManager {
 	
+	/**
+	 * Variable which indicates the previous action made on the board. The first element is the last piece moved, and
+	 * the second its source.
+	 */
 	public static Couple<Piece, CPoint> PREVIOUS_ACTION = null;
 	
 	/**

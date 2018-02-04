@@ -1,8 +1,15 @@
 package fr.polytech.projet.silkchess.debug;
 
+/**
+ * Debug class
+ * @author Valentin Berger
+ */
 public class Debug {
 	
-	public static final boolean DEBUG = true;
+	/**
+	 * Indicate if the program is in debug or not.
+	 */
+	public static final boolean DEBUG = false;
 	
 	public static void print(String text) {
 		if (DEBUG)

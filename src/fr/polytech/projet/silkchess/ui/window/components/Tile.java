@@ -5,8 +5,6 @@ import fr.polytech.projet.silkchess.debug.Debug;
 import fr.polytech.projet.silkchess.game.CPoint;
 import fr.polytech.projet.silkchess.game.Color;
 import fr.polytech.projet.silkchess.game.pieces.*;
-import fr.polytech.projet.silkchess.ui.preferences.EPref;
-import fr.polytech.projet.silkchess.ui.preferences.Pref;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,7 +63,7 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 		this.add(l_piece);
 		
 		this.setDropTarget(new DropTarget(this, this));
-		this.setTransferHandler(new TileTransferHandler());
+		//this.setTransferHandler(new TileTransferHandler());
 	}
 	
 	public void resetColor() {
@@ -103,19 +101,16 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (!Pref.getBoolean(EPref.CHESSBOARD_CONTROL)) {
+		if (e == null)
+			e = new MouseEvent(this, MouseEvent.BUTTON1, 0, InputEvent.BUTTON1_DOWN_MASK, 0, 0, 1, false);
+		
+		if (e.getButton() == MouseEvent.BUTTON1) {
+			tileListener.onTileDropBegin(this);
 			
-			if (e == null)
-				e = new MouseEvent(this, MouseEvent.BUTTON1, 0, InputEvent.BUTTON1_DOWN_MASK, 0, 0, 1, false);
-			
-			if (e.getButton() == MouseEvent.BUTTON1) {
-				tileListener.onTileDropBegin(this);
-				
-				if (actionListeners != null && actionListeners.size() > 0)
-					for (ActionListener al : actionListeners)
-						if (al != null)
-							al.actionPerformed(new ActionEvent(e.getSource(), e.getID(), e.paramString()));
-			}
+			if (actionListeners != null && actionListeners.size() > 0)
+				for (ActionListener al : actionListeners)
+					if (al != null)
+						al.actionPerformed(new ActionEvent(e.getSource(), e.getID(), e.paramString()));
 		}
 	}
 	
@@ -319,6 +314,7 @@ public class Tile extends JPanel implements MouseListener, Serializable, Transfe
 				"\n\tdtde.getSource(): " + dtde.getSource().toString() +
 				"\n\tdtde.getCurrentDataFlavors(): " + Arrays.toString(dtde.getCurrentDataFlavors()));
 		
+		//noinspection deprecation
 		if ((dtde.getDropAction() & TileTransferHandler.MOVE) != 0) {
 			dtde.acceptDrop(dtde.getDropAction());
 			Transferable t = dtde.getTransferable();

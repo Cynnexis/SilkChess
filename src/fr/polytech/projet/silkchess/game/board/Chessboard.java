@@ -33,7 +33,7 @@ import java.util.ArrayList;
  * ('A' ; 3) ('B' ; 3) ('C' ; 3) ('D' ; 3) ('E' ; 3) ('F' ; 3) ('G' ; 3) ('H' ; 3)
  * ('A' ; 2) ('B' ; 2) ('C' ; 2) ('D' ; 2) ('E' ; 2) ('F' ; 2) ('G' ; 2) ('H' ; 2)
  * ('A' ; 1) ('B' ; 1) ('C' ; 1) ('D' ; 1) ('E' ; 1) ('F' ; 1) ('G' ; 1) ('H' ; 1)
- *
+ * @author Valentin Berger
  */
 public class Chessboard extends Matrix<Piece> {
 	
@@ -57,6 +57,10 @@ public class Chessboard extends Matrix<Piece> {
 		}
 	}
 	
+	/**
+	 * Reset the chessboard by by placing {@code NoPiece} instance for each tile.
+	 * @see NoPiece
+	 */
 	public void reset() {
 		this.clear(new NoPiece());
 		
@@ -64,28 +68,6 @@ public class Chessboard extends Matrix<Piece> {
 			for (int j = 0; j < getNbRows(); j++)
 				this.set(i, j, new NoPiece(CPoint.fromPoint(i, j)));
 	}
-	
-	/*public boolean move(CPoint source, CPoint dest) {
-		Piece piece = this.get(source);
-		// Check if move is possible
-		if (piece.canMove(dest))
-		{
-			boolean b1 = this.set(dest, piece);
-			boolean b2 = this.set(source, new NoPiece(source));
-			return b1 && b2;
-		}
-		else
-			return false;
-	}
-	public boolean move(char sourceX, int sourceY, char destX, int destY) {
-		return move(new CPoint(sourceX, sourceY), new CPoint(destX, destY));
-	}
-	public boolean move(Point source, Point dest) {
-		return move(CPoint.fromPoint(source), CPoint.fromPoint(dest));
-	}
-	public boolean move(int sourceX, int sourceY, int destX, int destY) {
-		return move(new Point(sourceX, sourceY), new Point(destX, destY));
-	}*/
 	
 	public @Nullable Piece get(CPoint cpoint) {
 		return this.get(cpoint.getX() - 'A', getNbRows() - cpoint.getY());

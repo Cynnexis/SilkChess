@@ -21,6 +21,10 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * Kartona is an artifical intelligence
+ * @author Valentin Berger
+ */
 public class Kartona extends Player {
 	
 	@NotNull
@@ -37,7 +41,7 @@ public class Kartona extends Player {
 	}
 	
 	/**
-	 * Make Kartona thonk about a move
+	 * Make Kartona think about a move
 	 * @param board The current chessboard
 	 * @return Return a couple (piece, cpoint) where "piece" is the piece to move and "cpoint" its destination. If the
 	 *         couple is however null, then it means that Kartona forfeits.
@@ -58,9 +62,9 @@ public class Kartona extends Player {
 				long beginning = System.currentTimeMillis();
 				Node<ChessMinimaxParameters> tree = minimax.constructNode(board, getColor(), 2);
 				long end = System.currentTimeMillis();
-				System.out.println("Time to compute tree: " + (end - beginning) + "ms");
 				
-				if (tree != null) {
+				System.out.println("Time to compute tree: " + (end - beginning) + "ms");
+				if (tree != null && Debug.DEBUG) {
 					System.out.println("Kartona.think> Tree height: " + tree.computeHeight());
 					
 					for (int i = 0; i < tree.getChildren().size(); i++) {
@@ -95,12 +99,23 @@ public class Kartona extends Player {
 				while (n.getParent() != null && n.getParent().getParent() != null)
 					n = n.getParent();
 				
-				Piece p = n.getData().getLastMovedPiece();
-				p.setPosition(n.getData().getSource());
-				result.setX(p);
-				result.setY(n.getData().getLastMovedPiece().getPosition());
-				System.out.println("Kartona.think> result: " + result.toString());
-				break;
+				Piece p = null;
+				try {
+					p = n.getData().getLastMovedPiece().getClass().newInstance();
+					p.setColor(n.getData().getLastMovedPiece().getColor());
+					p.setPosition(n.getData().getSource());
+				} catch (InstantiationException | IllegalAccessException ex) {
+					ex.printStackTrace();
+				}
+				
+				if (p != null) {
+					result.setX(p);
+					result.setY(n.getData().getLastMovedPiece().getPosition());
+					System.out.println("Kartona.think> result: " + result.toString());
+					break;
+				}
+				
+				// Else, go to random difficulty
 			default:
 				Random rand = new Random(System.currentTimeMillis());
 				Piece randomPiece;

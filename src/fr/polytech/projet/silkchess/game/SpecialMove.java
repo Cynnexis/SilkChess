@@ -7,6 +7,7 @@ import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.game.ai.minimax.ChessMinimax;
 import fr.polytech.projet.silkchess.game.board.Chessboard;
 import fr.polytech.projet.silkchess.game.pieces.*;
+import org.jetbrains.annotations.Contract;
 
 import java.io.Serializable;
 
@@ -32,6 +33,17 @@ public class SpecialMove {
 	// This class cannot be instanciated
 	private SpecialMove() { }
 	
+	/**
+	 * Check if the castling move is possible.
+	 * @param board The current chessboard
+	 * @param king The king which is about to perform the castling
+	 * @param rook The rook which is about to perform the castling
+	 * @param checkCheck If {@code true}, check if the king, the rook and all the tiles between then are in check by
+	 *                   enemies.
+	 * @return Return {@code true} if the castling is possible and update the static variable {@code IS_CASTLING}, false
+	 *         otherwise
+	 * @throws NullPointerException Thrown if one of the argument is {@code null}
+	 */
 	public static boolean checkIfCastlingIsPossible(@NotNull Chessboard board, @NotNull King king, @NotNull Rook rook, boolean checkCheck) throws NullPointerException {
 		if (board == null || king == null || rook == null)
 			throw new NullPointerException();
@@ -91,12 +103,31 @@ public class SpecialMove {
 		
 		return true;
 	}
+	/**
+	 * Check if the castling move is possible, by checking if the rook, the king and all tiles between them are not
+	 * in check.
+	 * @param board The current chessboard
+	 * @param king The king which is about to perform the castling
+	 * @param rook The rook which is about to perform the castling
+	 * @return Return {@code true} if the castling is possible and update the static variable {@code IS_CASTLING}, false
+	 *         otherwise
+	 * @throws NullPointerException Thrown if one of the argument is {@code null}
+	 */
+	@Contract("null, _, _ -> fail; !null, null, _ -> fail; !null, !null, null -> fail")
 	public static boolean checkIfCastlingIsPossible(@NotNull Chessboard board, @NotNull King king, @NotNull Rook rook) throws NullPointerException {
 		return checkIfCastlingIsPossible(board, king, rook, true);
 	}
 	
+	/**
+	 * Check if a pawn can go two tiles ahead.
+	 * @param board The current chessboard
+	 * @param pawn The pawn to check
+	 * @return Return {@code true} if the pawn can go two tiles ahead, {@code false} otherwise.
+	 * @throws NullPointerException Thrown when one of the argument is {@code null}
+	 */
+	@Contract("null, _ -> fail; !null, null -> fail")
 	public static boolean checkIfFirstMoveIsPossible(@NotNull Chessboard board, @NotNull Pawn pawn) throws NullPointerException {
-		if (pawn == null)
+		if (board == null || pawn == null)
 			throw new NullPointerException();
 		
 		return !pawn.hasMoved() &&
@@ -107,11 +138,13 @@ public class SpecialMove {
 	}
 	
 	/**
-	 *
-	 * @param board
-	 * @param player
+	 * Check if a pawn can be promoted to a queen
+	 * @param board The current chessboard
+	 * @param player The current player
 	 * @return Return the pawn which can be promoted. If {@code null} is returned, then no pawn must be promoted.
 	 */
+	@org.jetbrains.annotations.Nullable
+	@Contract("null, _ -> fail; !null, null -> fail")
 	public static @Nullable Pawn checkIfPromotionIsPossible(@NotNull Chessboard board, @NotNull Color player) throws NullPointerException {
 		if (board == null || player == null)
 			throw new NullPointerException();

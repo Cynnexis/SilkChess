@@ -9,6 +9,11 @@ import fr.berger.enhancedlist.tree.Tree;
 
 import java.io.Serializable;
 
+/**
+ * Abstract Minimax algorithm.
+ * @param <T> The type of data a node contains
+ * @author Valentin Berger
+ */
 public abstract class AbstractMinimax<T> implements Serializable, Computable<T> {
 	
 	public static final int PLUS_INFINITY = Integer.MAX_VALUE;

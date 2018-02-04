@@ -24,7 +24,8 @@ import java.util.ArrayList;
 public class ChessMinimax extends AbstractMinimax<ChessMinimaxParameters> {
 	
 	public @NotNull Node<ChessMinimaxParameters> constructNode(@NotNull Chessboard board, @NotNull Color token, int depth) {
-		return constructNode(new Node<>(), board, token, depth);
+		// Add one to depth because thr root is 'null'
+		return constructNode(new Node<>(), board, token, ++depth);
 	}
 	public @NotNull Node<ChessMinimaxParameters> constructNode(@NotNull Node<ChessMinimaxParameters> node, @NotNull Chessboard board,
 	                                                           @NotNull Color token, int depth) {
@@ -79,14 +80,10 @@ public class ChessMinimax extends AbstractMinimax<ChessMinimaxParameters> {
 					
 					// Now that the node is created, either step down again (if depth != 1) or just add the chessboard
 					// as a child
-					ChessMinimaxParameters data = new ChessMinimaxParameters(copyBoard, piece, src, startPlayer, token);
+					ChessMinimaxParameters data = new ChessMinimaxParameters(copyBoard, copyPiece, src, startPlayer, token);
 					Node<ChessMinimaxParameters> child = new Node<>(data);
-					if (depth > 1) {
-						child.addChild(constructNode(new Node<>(null, child), copyBoard, Color.invert(token), depth - 1));
-						//root.addChild(child);
-					}
-					//root.addChild(child);
-					node.addChild(child);
+					if (depth > 1)
+						node.addChild(constructNode(child, copyBoard, Color.invert(token), depth - 1));
 				}
 			}
 		}
@@ -98,11 +95,11 @@ public class ChessMinimax extends AbstractMinimax<ChessMinimaxParameters> {
 	@Override
 	public int compute(ChessMinimaxParameters data) {
 		if (data == null)
-			throw new IllegalArgumentException();
+			throw new NullPointerException();
 		
 		for (Object datum : data)
 			if (datum == null)
-				throw new IllegalArgumentException();
+				throw new NullPointerException();
 		
 		Chessboard board = data.getChessboard();
 		Piece piece = data.getLastMovedPiece();
