@@ -11,6 +11,7 @@ import fr.polytech.projet.silkchess.game.MoveManager;
 import fr.polytech.projet.silkchess.game.board.Chessboard;
 import fr.polytech.projet.silkchess.game.exceptions.NoPieceException;
 import fr.polytech.projet.silkchess.game.pieces.*;
+import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
 
@@ -18,66 +19,80 @@ import java.util.ArrayList;
  * Source:
  *  * https://en.wikipedia.org/wiki/Minimax
  *  * https://medium.freecodecamp.org/simple-chess-ai-step-by-step-1d55a9266977
- *
+ * @author Valentin Berger
  */
 public class ChessMinimax extends AbstractMinimax<ChessMinimaxParameters> {
 	
-	/*
-	@Deprecated
-	public Tree<Chessboard> constructTree(@NotNull Chessboard board, @NotNull Color token, int depth) {
-		Node<ChessMinimaxParameters> nodes = constructNode(board, token, depth);
-		//
-	}
-	*/
-	
 	public @NotNull Node<ChessMinimaxParameters> constructNode(@NotNull Chessboard board, @NotNull Color token, int depth) {
+		return constructNode(new Node<>(), board, token, depth);
+	}
+	public @NotNull Node<ChessMinimaxParameters> constructNode(@NotNull Node<ChessMinimaxParameters> node, @NotNull Chessboard board,
+	                                                           @NotNull Color token, int depth) {
 		if (depth <= 0)
 			return null;
 		
-		if (board == null || token == null)
+		if (node == null || board == null || token == null)
 			throw new NullPointerException();
 		
 		// Create the instance of the tree
-		Node<ChessMinimaxParameters> root = new Tree<>();
+		//Node<ChessMinimaxParameters> root = new Node<>();
 		
 		// Get all player's pieces
 		ArrayList<Piece> pieces = board.getAll(token);
 		
+		// For each piece
 		for (Piece piece : pieces) {
 			ArrayList<CPoint> possibilities;
+			
+			// Get all the possibilities of the piece
 			try {
 				possibilities = MoveManager.computeAllPossibleMoveWithCheck(board, piece);
 			} catch (NoPieceException ignored) {
 				possibilities = new ArrayList<>();
 			}
 			
-			Piece copyPiece = null;
-			try {
-				copyPiece = piece.getClass().newInstance();
-				copyPiece.setColor(piece.getColor());
-				copyPiece.setPosition(piece.getPosition());
-			} catch (InstantiationException | IllegalAccessException e) {
-				e.printStackTrace();
-			}
+			// Save the current position of the piece before moving it
+			CPoint src = piece.getPosition();
 			
-			if (copyPiece != null) {
-				CPoint src = piece.getPosition();
+			// For each possibility
+			for (CPoint possibility : possibilities) {
+				Piece copyPiece = null;
 				
-				for (CPoint possibility : possibilities) {
+				// Try to create a new instance of piece (note: Piece is abstract)
+				try {
+					copyPiece = piece.getClass().newInstance();
+					copyPiece.setColor(piece.getColor());
+					copyPiece.setPosition(piece.getPosition());
+				} catch (InstantiationException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+				
+				// If the piece has been fetched, make an heuristic move
+				if (copyPiece != null) {
+					// Copy the chessboard, and make the piece move to one possibility
 					Chessboard copyBoard = new Chessboard(board);
 					copyBoard.move(copyPiece, possibility);
 					
+					Color startPlayer = token;
+					if (node.getParent() != null && node.getParent().getData() != null && node.getParent().getData().getStartPlayer() != null)
+						startPlayer = node.getParent().getData().getStartPlayer();
+					
 					// Now that the node is created, either step down again (if depth != 1) or just add the chessboard
 					// as a child
-					if (depth > 1)
-						root.addChild(constructNode(copyBoard, token, depth - 1));
-					else
-						root.addChild(new ChessMinimaxParameters(copyBoard, piece, src, token));
+					ChessMinimaxParameters data = new ChessMinimaxParameters(copyBoard, piece, src, startPlayer, token);
+					Node<ChessMinimaxParameters> child = new Node<>(data);
+					if (depth > 1) {
+						child.addChild(constructNode(new Node<>(null, child), copyBoard, Color.invert(token), depth - 1));
+						//root.addChild(child);
+					}
+					//root.addChild(child);
+					node.addChild(child);
 				}
 			}
 		}
 		
-		return root;
+		// Return the tree
+		return node;
 	}
 	
 	@Override
@@ -92,34 +107,41 @@ public class ChessMinimax extends AbstractMinimax<ChessMinimaxParameters> {
 		Chessboard board = data.getChessboard();
 		Piece piece = data.getLastMovedPiece();
 		CPoint source = data.getSource();
+		Color startPlayer = data.getStartPlayer();
 		Color token = data.getPlayer();
 		
 		int score = 0;
-		if (piece instanceof King) {
-			score = 900;
+		for (int i = 0; i < board.getNbColumns(); i++) {
+			for (int j = 0; j < board.getNbRows(); j++) {
+				score += computePiece(board.get(i, j), startPlayer);
+			}
 		}
-		else if (piece instanceof Queen) {
-			score = 90;
-		}
-		else if (piece instanceof Rook) {
-			score = 50;
-		}
-		else if (piece instanceof Knight) {
-			score = 30;
-		}
-		else if (piece instanceof Bishop) {
-			score = 30;
-		}
-		else if (piece instanceof Pawn) {
-			score = 10;
-		}
-		else {
-			score = 0;
-		}
-		
-		if (piece.getColor() == Color.invert(token))
-			score = -score;
 		
 		return score;
+	}
+	
+	@Contract(value = "null, _ -> fail; !null, null -> fail", pure = true)
+	private int computePiece(@NotNull Piece piece, @NotNull Color token) {
+		if (piece == null || token == null)
+			throw new NullPointerException();
+		
+		int result = 0;
+		if (piece instanceof King)
+			result = 900;
+		else if (piece instanceof Queen)
+			result = 90;
+		else if (piece instanceof Rook)
+			result = 50;
+		else if (piece instanceof Knight)
+			result = 30;
+		else if (piece instanceof Bishop)
+			result = 30;
+		else if (piece instanceof Pawn)
+			result = 10;
+		
+		if (piece.getColor() == token)
+			result = -result;
+		
+		return result;
 	}
 }

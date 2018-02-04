@@ -55,8 +55,32 @@ public class Kartona extends Player {
 		{
 			case STRATEGY:
 				ChessMinimax minimax = new ChessMinimax();
-				Node<ChessMinimaxParameters> tree = minimax.constructNode(board, getColor(), 1);
-				Couple<Integer, ChessMinimaxParameters> r = new Couple<>();
+				long beginning = System.currentTimeMillis();
+				Node<ChessMinimaxParameters> tree = minimax.constructNode(board, getColor(), 2);
+				long end = System.currentTimeMillis();
+				System.out.println("Time to compute tree: " + (end - beginning) + "ms");
+				
+				if (tree != null) {
+					System.out.println("Kartona.think> Tree height: " + tree.computeHeight());
+					
+					for (int i = 0; i < tree.getChildren().size(); i++) {
+						Node<ChessMinimaxParameters> child = tree.getChildren().get(i);
+						System.out.println("Child n°" + i + "/" + tree.getChildren().size() + " :");
+						if (child == null)
+							System.out.println("(null)");
+						else {
+							System.out.println(child.getData() != null ?
+									(child.getData().getChessboard() != null ?
+											child.getData().getChessboard().toString() :
+											"(null)") :
+									"(null)");
+							if (child.getChildren() != null && child.getChildren().size() > 0)
+								System.out.println("Number of children for this child: " + child.getChildren().size());
+						}
+					}
+				}
+				
+				Couple<Integer, Node<ChessMinimaxParameters>> r = new Couple<>();
 				try {
 					r = minimax.minimax(tree);
 					System.out.println("Kartona.think> Strategy result = " + r.toString());
@@ -66,10 +90,16 @@ public class Kartona extends Player {
 					return null;
 				}
 				
-				Piece p = r.getY().getLastMovedPiece();
-				p.setPosition(r.getY().getSource());
+				// Search the root of the path drawn by the minimax
+				Node<ChessMinimaxParameters> n = r.getY();
+				while (n.getParent() != null && n.getParent().getParent() != null)
+					n = n.getParent();
+				
+				Piece p = n.getData().getLastMovedPiece();
+				p.setPosition(n.getData().getSource());
 				result.setX(p);
-				result.setY(r.getY().getLastMovedPiece().getPosition());
+				result.setY(n.getData().getLastMovedPiece().getPosition());
+				System.out.println("Kartona.think> result: " + result.toString());
 				break;
 			default:
 				Random rand = new Random(System.currentTimeMillis());

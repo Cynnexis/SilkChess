@@ -14,27 +14,27 @@ public abstract class AbstractMinimax<T> implements Serializable, Computable<T> 
 	public static final int PLUS_INFINITY = Integer.MAX_VALUE;
 	public static final int MINUS_INFINITY = Integer.MIN_VALUE;
 	
-	public Couple<Integer, T> minimax(@Nullable Tree<T> root) throws InfiniteLoopException {
+	public Couple<Integer, Node<T>> minimax(@Nullable Tree<T> root) throws InfiniteLoopException {
 		InfiniteLoopException ex = new InfiniteLoopException();
 		return minimax(root, root.computeHeight(), true, ex);
 	}
-	public Couple<Integer, T> minimax(@Nullable Node<T> root) throws InfiniteLoopException {
+	public Couple<Integer, Node<T>> minimax(@Nullable Node<T> root) throws InfiniteLoopException {
 		InfiniteLoopException ex = new InfiniteLoopException();
 		return minimax(root, root.computeHeight(), true, ex);
 	}
-	public Couple<Integer, T> minimax(@NotNull Node<T> node, int depth, boolean isMax) throws InfiniteLoopException {
+	public Couple<Integer, Node<T>> minimax(@NotNull Node<T> node, int depth, boolean isMax) throws InfiniteLoopException {
 		return minimax(node, depth, isMax, null);
 	}
-	public Couple<Integer, T> minimax(@NotNull Node<T> node, int depth, boolean isMax, @Nullable InfiniteLoopException ex) throws InfiniteLoopException {
+	public Couple<Integer, Node<T>> minimax(@NotNull Node<T> node, int depth, boolean isMax, @Nullable InfiniteLoopException ex) throws InfiniteLoopException {
 		if (node == null)
 			throw new NullPointerException();
 		
 		if (depth == 0 || node.isLeaf())
 			// Return the heurisitc value of 'node'
-			return new Couple<>(compute(node.getData()), node.getData());
+			return new Couple<>(compute(node.getData()), node);
 		
 		int bestValue = 0;
-		Couple<Integer, T> v = new Couple<>(0, null);
+		Couple<Integer, Node<T>> v = new Couple<>(0, null);
 		
 		if (isMax) {
 			bestValue = MINUS_INFINITY;

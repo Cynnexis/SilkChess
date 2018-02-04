@@ -9,6 +9,7 @@ import fr.polytech.projet.silkchess.game.CPoint;
 import fr.polytech.projet.silkchess.game.Color;
 import fr.polytech.projet.silkchess.game.Player;
 import fr.polytech.projet.silkchess.game.pieces.*;
+import fr.polytech.projet.silkchess.ui.window.components.PieceRepresentation;
 
 import java.util.ArrayList;
 
@@ -46,9 +47,14 @@ public class Chessboard extends Matrix<Piece> {
 		
 		reset();
 		
-		for (int i = 0; i < getNbColumns(); i++)
-			for (int j = 0; j < getNbRows(); j++)
-				this.set(i, j, copy.get(i, j));
+		for (int i = 0; i < getNbColumns(); i++) {
+			for (int j = 0; j < getNbRows(); j++) {
+				if (copy.get(i, j) == null)
+					this.set(i, j, new NoPiece(CPoint.fromPoint(i, j)));
+				else
+					this.set(i, j, copy.get(i, j));
+			}
+		}
 	}
 	
 	public void reset() {
@@ -167,5 +173,38 @@ public class Chessboard extends Matrix<Piece> {
 			}
 		}
 		return pieces;
+	}
+	
+	/* OVERRIDE */
+	
+	@Override
+	public String toString() {
+		StringBuilder build = new StringBuilder("\n");
+		
+		for (int i = 0; i < getNbColumns(); i++) {
+			
+			if (i == 0) {
+				// Building horizontal line
+				for (int j = 0; j < getNbRows() * 2 + 1; j++)
+					build.append(j % 2 == 0 ? '+' : '-');
+				build.append("\n");
+			}
+			
+			// Building pieces
+			for (int j = 0; j < getNbRows(); j++) {
+				if (j == 0)
+					build.append("|");
+				build.append(PieceRepresentation.getRepresentation(get(j, i), get(j, i).getColor())).append("|");
+			}
+			
+			build.append("\n");
+			
+			// Building horizontal line
+			for (int j = 0; j < getNbRows() * 2 + 1; j++)
+				build.append(j % 2 == 0 ? '+' : '-');
+			build.append("\n");
+		}
+		
+		return build.toString();
 	}
 }

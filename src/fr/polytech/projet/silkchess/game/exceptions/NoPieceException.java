@@ -4,7 +4,7 @@ import fr.berger.enhancedlist.Point;
 import fr.polytech.projet.silkchess.game.CPoint;
 import fr.polytech.projet.silkchess.game.pieces.Piece;
 
-public class NoPieceException extends Exception {
+public class NoPieceException extends RuntimeException {
 	
 	public NoPieceException(CPoint cpoint) {
 		super("No piece at the coordinates (" + cpoint.getX() + " ; " + cpoint.getY() + ").");

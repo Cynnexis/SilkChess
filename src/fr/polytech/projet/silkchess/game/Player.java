@@ -5,6 +5,10 @@ import fr.polytech.projet.silkchess.game.pieces.Piece;
 
 import java.util.ArrayList;
 
+/**
+ * Player is a class which manage a player of the chess game.
+ * @author Valentin Berger
+ */
 public class Player {
 	
 	@NotNull

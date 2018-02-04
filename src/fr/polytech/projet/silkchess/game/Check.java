@@ -10,6 +10,7 @@ import fr.polytech.projet.silkchess.game.pieces.NoPiece;
 import fr.polytech.projet.silkchess.game.pieces.Piece;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.function.Function;
 
 public class Check {
@@ -61,83 +62,40 @@ public class Check {
 			if (checkIfPieceIsChecked(board, kings.get(i)))
 				state = kings.get(i).getColor() == Color.BLACK ? CheckState.B_CHECK : CheckState.W_CHECK;
 		
-		// TODO: Fix this bug
-		
 		/**
 		 * How a checkmate/stalemate is detected:
 		 * CHECKMATE: the king is in check, all tiles around him are in checks, and no ally can help him
 		 * STALEMATE: the king IS NOT in check, all tiles around him are in checks, and no ally can help him
 		 */
 		
-		// If a check is detected, check checkmate
-		if (state == CheckState.B_CHECK || state == CheckState.W_CHECK)
-		{
-			// Get all tiles around the checked king
+		// Check stalemate
+		ArrayList<Piece> blacks = board.getAll(Color.BLACK);
+		ArrayList<Piece> whites = board.getAll(Color.WHITE);
+		if (blacks.size() == 1 && whites.size() == 1 && blacks.get(0) instanceof King && whites.get(0) instanceof King)
+			return CheckState.STALEMATE;
+		
+		
+		// Compute all possible chessboard for every position of every piece. If no such chessboard exist, checkmate!
+		
+		// For each colors
+		Color currentColor;
+		for (int i = 0; i < Color.values().length ; i++) {
+			currentColor = Color.values()[i];
+			ArrayList<Piece> allies = board.getAll(currentColor);
 			
-			// First, get the checked king
-			King checkedKing = null;
-			for (int i = 0; i < kings.size() && checkedKing == null; i++) {
-				if (kings.get(i) != null && (
-					(kings.get(i).getColor() == Color.WHITE && state == CheckState.W_CHECK) ||
-					(kings.get(i).getColor() == Color.BLACK && state == CheckState.B_CHECK)))
-					checkedKing = kings.get(i);
+			boolean noMovePossible = true;
+			for (int j = 0; j < allies.size() && noMovePossible; j++) {
+				Piece ally = allies.get(j);
+				if (!(ally instanceof NoPiece))
+					if (MoveManager.computeAllPossibleMoveWithCheck(board, ally).size() > 0)
+						noMovePossible = false;
 			}
 			
-			try {
-				boolean result = areAllTilesAroundKingChecked(board, checkedKing);
-				
-				// If all tiles around the king are checked, verify if an ally can help
-				if (result) {
-					//noinspection ConstantConditions
-					ArrayList<Piece> allies = board.getAll(checkedKing.getColor());
-					
-					boolean allyCanHelp = false;
-					
-					for (int i = 0; i < allies.size() && !allyCanHelp; i++) {
-						ArrayList<CPoint> possibilities = MoveManager.computeAllPossibleMoveWithoutCheck(board, allies.get(i));
-						
-						for (int j = 0; j < possibilities.size() && !allyCanHelp; j++) {
-							// Copy king and the board to perform virtual actions
-							King copyKing = new King(checkedKing.getColor(), checkedKing.getPosition());
-							Chessboard c = new Chessboard(board);
-							
-							c.move(allies.get(i), possibilities.get(j));
-							
-							if (!checkIfPieceIsChecked(c, copyKing))
-								allyCanHelp = true;
-						}
-					}
-					
-					if (!allyCanHelp)
-						state = checkedKing.getColor() == Color.BLACK ? CheckState.B_CHECKMATE : CheckState.W_CHECKMATE;
-				}
-				
-			} catch (NoPieceException ex) {
-				ex.printStackTrace();
+			if (noMovePossible) {
+				state = currentColor == Color.BLACK ? CheckState.W_CHECKMATE : CheckState.B_CHECKMATE;
+				break;
 			}
 		}
-		// If a check is not detected, then check stalemate
-		/*else
-		{
-			boolean stalemate = false;
-			int i = 0;
-			for (; i < kings.size() && !stalemate; i++) {
-				try {
-					if (!isThereOneTileNotCheckedAroundKing(board, kings.get(i)))
-						stalemate = true;
-				} catch (NoPieceException ex) {
-					ex.printStackTrace();
-				}
-			}
-			
-			if (stalemate) {
-				if (i >= kings.size())
-					state = kings.get(kings.size() - 1).getColor() == Color.BLACK ? CheckState.B_CHECKMATE : CheckState.W_CHECKMATE;
-				else
-					state = kings.get(i).getColor() == Color.BLACK ? CheckState.B_CHECKMATE : CheckState.W_CHECKMATE;
-			}
-			
-		}*/
 		
 		return state;
 	}

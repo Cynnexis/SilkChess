@@ -18,6 +18,7 @@ import fr.polytech.projet.silkchess.ui.window.components.JChessboard;
 import fr.polytech.projet.silkchess.ui.window.components.JChessboardListener;
 import fr.polytech.projet.silkchess.ui.window.components.PlayerBoardPanel;
 import fr.polytech.projet.silkchess.ui.window.components.Tile;
+import org.jetbrains.annotations.Contract;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -28,6 +29,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * Frame is the main window of the program. It uses the Singleton Pattern Design.
+ * @author Valentin Berger
+ */
 @SuppressWarnings("FieldCanBeLocal")
 public class Frame extends JFrame {
 	
@@ -365,6 +370,7 @@ public class Frame extends JFrame {
 		this.setVisible(true);
 	}
 	
+	@Contract(pure = true)
 	public static Frame getInstance() {
 		return frame;
 	}

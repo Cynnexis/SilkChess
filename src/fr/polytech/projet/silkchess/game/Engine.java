@@ -140,6 +140,8 @@ public class Engine implements Serializable {
 				else
 					setState(getKartona().getColor() == Color.BLACK ? GameState.W_WIN : GameState.B_WIN);
 			}
+			
+			//System.out.println(getBoard().toString());
 		}
 	}
 	public void play(@NotNull Point src, @NotNull Point dest)
@@ -169,6 +171,9 @@ public class Engine implements Serializable {
 	private void move(@NotNull Piece src, @NotNull CPoint dest) {
 		if (src == null || dest == null)
 			throw new NullPointerException();
+		
+		if (src.getPosition().equals(dest))
+			throw new TileFullException(dest);
 		
 		CPoint pieceSource = src.getPosition();
 		
@@ -282,8 +287,27 @@ public class Engine implements Serializable {
 			CheckState oldState = this.check;
 			this.check = check;
 			
-			if (oldState != this.check)
+			if (oldState != this.check) {
+				switch (this.check)
+				{
+					case NO_CHECKSTATE:
+						break;
+					case B_CHECK:
+						break;
+					case W_CHECK:
+						break;
+					case B_CHECKMATE:
+						setState(GameState.W_WIN);
+						break;
+					case W_CHECKMATE:
+						setState(GameState.B_WIN);
+						break;
+					case STALEMATE:
+						setState(GameState.PAUSE);
+						break;
+				}
 				engineListener.onCheckStateChanged(this.check);
+			}
 		}
 	}
 	
@@ -336,6 +360,13 @@ public class Engine implements Serializable {
 	
 	public void setUseKartona(boolean useKartona) {
 		this.useKartona = useKartona;
+		
+		if (this.useKartona) {
+			if (kartona == null)
+				kartona = new Kartona(IntelligenceMode.RANDOM, Color.invert(getToken()));
+			else
+				kartona.setColor(Color.invert(getToken()));
+		}
 	}
 	
 	public Kartona getKartona() {
@@ -367,6 +398,5 @@ public class Engine implements Serializable {
 	}
 }
 
-// TODO: Implement CHECKMATE and STALEMATE detection
-// TODO: Fix the Castling bug, which delete the rook
 // TODO: Implement Minimax algorithm
+// TODO: Bug that make Kartona bug when enable when black must play.

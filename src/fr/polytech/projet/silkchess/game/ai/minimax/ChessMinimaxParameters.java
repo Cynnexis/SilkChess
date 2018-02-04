@@ -19,20 +19,23 @@ public class ChessMinimaxParameters implements Serializable, Iterable<Object> {
 	@NotNull
 	private CPoint source;
 	@NotNull
+	private Color startPlayer;
+	@NotNull
 	private Color player;
 	
 	/* CONSTRUCTOR */
 	
-	public ChessMinimaxParameters(@NotNull Chessboard chessboard, @NotNull Piece lastMovedPiece, @NotNull CPoint source, @NotNull Color player) {
+	public ChessMinimaxParameters(@NotNull Chessboard chessboard, @NotNull Piece lastMovedPiece, @NotNull CPoint source, @NotNull Color startPlayer, @NotNull Color player) {
 		setChessboard(chessboard);
 		setLastMovedPiece(lastMovedPiece);
 		setSource(source);
+		setStartPlayer(startPlayer);
 		setPlayer(player);
 	}
 	
 	/* METHOD */
 	
-	public Object get(int i) {
+	public @NotNull Object get(int i) {
 		switch (i) {
 			case 0:
 				return getChessboard();
@@ -41,6 +44,8 @@ public class ChessMinimaxParameters implements Serializable, Iterable<Object> {
 			case 2:
 				return getSource();
 			case 3:
+				return getStartPlayer();
+			case 4:
 				return getPlayer();
 			default:
 				return null;
@@ -82,6 +87,17 @@ public class ChessMinimaxParameters implements Serializable, Iterable<Object> {
 		this.source = source;
 	}
 	
+	public @NotNull Color getStartPlayer() {
+		return startPlayer;
+	}
+	
+	public void setStartPlayer(@NotNull Color startPlayer) {
+		if (startPlayer == null)
+			throw new NullPointerException();
+		
+		this.startPlayer = startPlayer;
+	}
+	
 	public @NotNull Color getPlayer() {
 		return player;
 	}
@@ -103,7 +119,7 @@ public class ChessMinimaxParameters implements Serializable, Iterable<Object> {
 			
 			@Override
 			public boolean hasNext() {
-				return index < 4;
+				return index < 5;
 			}
 			
 			@Override
@@ -121,12 +137,13 @@ public class ChessMinimaxParameters implements Serializable, Iterable<Object> {
 		return Objects.equals(getChessboard(), objects.getChessboard()) &&
 				Objects.equals(getLastMovedPiece(), objects.getLastMovedPiece()) &&
 				Objects.equals(getSource(), objects.getSource()) &&
+				getStartPlayer() == objects.getStartPlayer() &&
 				getPlayer() == objects.getPlayer();
 	}
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(getChessboard(), getLastMovedPiece(), getSource(), getPlayer());
+		return Objects.hash(getChessboard(), getLastMovedPiece(), getSource(), getStartPlayer(), getPlayer());
 	}
 	
 	@Override
@@ -135,6 +152,7 @@ public class ChessMinimaxParameters implements Serializable, Iterable<Object> {
 				"chessboard=" + chessboard +
 				", lastMovedPiece=" + lastMovedPiece +
 				", source=" + source +
+				", startPlayer=" + startPlayer +
 				", player=" + player +
 				'}';
 	}
